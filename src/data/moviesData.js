@@ -22,13 +22,17 @@ const moviesData = [
   },
   {
     id: "m3",
-    title: "The Last Orchard",
-    runtime: 95,
-    rating: "PG",
-    price: 180,
+    image: "",
+    title: "Last Horizon",
+    runtime: 130,
+    rating: "R",
+    price: 200,
+    featured: true,
+    genre: ["Action", "Sci-fi", "Comedy"],
     schedule: ["2025-10-10T12:30", "2025-10-11T17:00"],
     poster:
-      "https://images.unsplash.com/photo-1505682634904-d7c6e0f7e0f0?q=80&w=800&auto=format&fit=crop",
+      "",
+    description: "Determined to save humanity, a rogue astronaut embarks on a perilous mission to the edge of the solar system, confronting cosmic dangers and personal demons along the way."
   },
   {
     id: "m4",
@@ -37,9 +41,10 @@ const moviesData = [
     runtime: 130,
     rating: "PG",
     price: 180,
+    featured: true,
+    genre: ["Mystery", "Comedy"],
     schedule: ["2025-10-10T12:30", "2025-10-11T17:00"],
-    poster:
-      "https://images.unsplash.com/photo-1505682634904-d7c6e0f7e0f0?q=80&w=800&auto=format&fit=crop",
+    poster:"/posters/Wednesday.jpg",
     description: "Smart, sarcastic, and a little dead inside, Wednesday Addams investigates twisted mysteries while making new friends—and foes—at Nevermore Academy."
   },
 ];
