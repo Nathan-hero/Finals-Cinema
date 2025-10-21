@@ -14,7 +14,7 @@ export default function Home() {
   const [filter, setFilter] = useState("All");
   const [selectedGenre, setSelectedGenre] = useState("All");
 
-  // Pick a random featured movie on load
+  // Pick a random featured movie on load DO NOT TOUCH
   useEffect(() => {
     setFeatured(moviesData[Math.floor(Math.random() * moviesData.length)]);
   }, []);
