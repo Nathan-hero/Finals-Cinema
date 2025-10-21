@@ -9,17 +9,9 @@ export default function MovieCard({ movie, onSelect }) {
       <img
         src={movie.poster}
         alt={movie.title}
-        className="w-full h-64 object-cover"
+        className="w-full h-85 object-cover"
       />
-      <div className="p-4">
-        <h3 className="font-bold text-lg">{movie.title}</h3>
-        <p className="text-sm text-gray-600">
-          {movie.runtime} mins | Rated {movie.rating}
-        </p>
-        <p className="mt-2 font-semibold text-slate-700">
-          ₱{movie.price}
-        </p>
-      </div>
+      
     </div>
   );
 }

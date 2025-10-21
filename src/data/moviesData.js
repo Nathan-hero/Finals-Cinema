@@ -44,7 +44,7 @@ const moviesData = [
     featured: true,
     genre: ["Mystery", "Comedy"],
     schedule: ["2025-10-10T12:30", "2025-10-11T17:00"],
-    poster:"/posters/Wednesday.jpg",
+    poster:"/poster/wednesday-poster.jpg",
     description: "Smart, sarcastic, and a little dead inside, Wednesday Addams investigates twisted mysteries while making new friends—and foes—at Nevermore Academy."
   },
 ];
