@@ -8,32 +8,72 @@ import MovieDetails from "./pages/MovieDetails.jsx";
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const navigate = useNavigate();
 
+  // ✅ Check for token and user on app load
   useEffect(() => {
-    const saved = localStorage.getItem("cbs_auth_v1");
-    if (saved) setUser(JSON.parse(saved));
+    const token = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
+    
+    if (token && savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
   }, []);
 
+  // ✅ Clear ALL auth data on logout
   function handleLogout() {
-    localStorage.removeItem("cbs_auth_v1");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("cbs_auth_v1"); // Remove old key if it exists
     setUser(null);
+    setShowLogoutConfirm(false); // Close the modal
     navigate("/");
   }
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col">
-      <Navbar user={user} onLogout={handleLogout} />
+      <Navbar 
+        user={user} 
+        onLogout={() => setShowLogoutConfirm(true)} // ✅ Show confirmation modal
+      />
+      
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-zinc-900 p-8 rounded-lg border border-zinc-700 shadow-lg max-w-md w-full mx-4">
+            <h3 className="text-2xl font-bold text-white text-center mb-4">Confirm Logout</h3>
+            <p className="text-gray-400 text-center mb-6">
+              Are you sure you want to log out?
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold py-2.5 rounded transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded transition-colors"
+              >
+                Yes, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={user ? <Home /> : <AuthForm onAuthSuccess={(u) => setUser(u)} />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/auth" element={<AuthForm onAuthSuccess={(u) => setUser(u)} />} />
           <Route path="/movie/:id" element={<MovieDetails />} />
         </Routes>
       </main>
       <footer className="text-center text-xs py-3 text-slate-500">
-        © 2025 CineMate — Vite + React + Tailwind
+        © 2025 CinEase — Vite + React + Tailwind
       </footer>
     </div>
   );

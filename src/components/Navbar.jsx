@@ -54,7 +54,7 @@ export default function Navbar({ user, onLogout, onSearch }) {
           to="/dashboard"
           className="hover:text-red-500 transition text-[17px] font-light"
         >
-          Dashboard
+          Bookings
         </Link>
 
         {user ? (

@@ -3,21 +3,59 @@ import moviesData from "../data/moviesData";
 import MovieCard from "../components/MovieCard";
 import SeatPicker from "../components/SeatPicker";
 import { formatFriendly } from "../utils/format";
-import useLocalStorage from "../hooks/useLocalStorage";
 
 export default function Home() {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [showSeatPicker, setShowSeatPicker] = useState(false);
-  const [bookings, setBookings] = useLocalStorage("cbs_bookings_v1", []);
+  // ✅ REMOVED: const [bookings, setBookings] = useLocalStorage("cbs_bookings_v1", []);
   const [featured, setFeatured] = useState(null);
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [filter, setFilter] = useState("All");
   const [selectedGenre, setSelectedGenre] = useState("All");
 
-  // Pick a random featured movie on load DO NOT TOUCH
+  // Get all featured movies
+  const featuredMovies = moviesData.filter((m) => m.featured);
+
+  // Set initial featured movie
   useEffect(() => {
-    setFeatured(moviesData[Math.floor(Math.random() * moviesData.length)]);
+    if (featuredMovies.length > 0) {
+      setFeatured(featuredMovies[0]);
+      setFeaturedIndex(0);
+    }
   }, []);
+
+  // Smooth transition function
+  const transitionToMovie = (index) => {
+    if (index === featuredIndex || isTransitioning) return;
+    
+    setIsTransitioning(true);
+    
+    // Fade out
+    setTimeout(() => {
+      setFeaturedIndex(index);
+      setFeatured(featuredMovies[index]);
+      setIsTransitioning(false);
+    }, 300);
+  };
+
+  // Auto-rotate featured movies every 5 seconds
+  useEffect(() => {
+    if (featuredMovies.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      const nextIndex = (featuredIndex + 1) % featuredMovies.length;
+      transitionToMovie(nextIndex);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [featuredIndex, featuredMovies.length, isTransitioning]);
+
+  // Handle manual navigation
+  const goToFeatured = (index) => {
+    transitionToMovie(index);
+  };
 
   // Extract unique genres
   const genres = ["All", ...new Set(
@@ -41,18 +79,10 @@ export default function Home() {
     setSelectedSchedule(null);
   };
 
-  const handleConfirmSeats = (seats) => {
-    const booking = {
-      id: `b_${Date.now()}`,
-      movieId: selectedMovie.id,
-      title: selectedMovie.title,
-      schedule: selectedSchedule,
-      seats,
-      total: selectedMovie.price * seats.length,
-    };
-    setBookings([...bookings, booking]);
+  // ✅ FIXED: Just close the modal - SeatPicker already saved to database
+  const handleConfirmSeats = () => {
     setShowSeatPicker(false);
-    alert(`Successfully booked ${seats.length} seat(s) for ${selectedMovie.title}`);
+    // Success alert is shown in SeatPicker.jsx after database save
   };
 
   const scroll = (id, offset) =>
@@ -62,17 +92,53 @@ export default function Home() {
     <div className="min-h-screen bg-black text-white">
       {/* 🎬 FEATURED MOVIE SECTION */}
       {featured && (
-        <section
-          className="relative h-[80vh] flex items-center text-white"
-          style={{
-            background: `url(${featured.image}) center right / cover no-repeat`,
-          }}
-        >
+        <section className="relative h-[80vh] flex items-center text-white overflow-hidden">
+          {/* Background Image with Smooth Transition */}
+          <div
+            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700 ${
+              isTransitioning ? "opacity-0" : "opacity-100"
+            }`}
+            style={{
+              backgroundImage: `url(${featured.banner || featured.image || featured.poster})`,
+              backgroundPosition: "center right",
+            }}
+          />
+          
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
-          <div className="relative z-10 px-10 lg:px-20 max-w-2xl">
+          
+          {/* Navigation Arrows */}
+          {featuredMovies.length > 1 && (
+            <>
+              <button
+                onClick={() => goToFeatured((featuredIndex - 1 + featuredMovies.length) % featuredMovies.length)}
+                disabled={isTransitioning}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center bg-black/50 hover:bg-red-600 rounded-full transition-all duration-300 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={() => goToFeatured((featuredIndex + 1) % featuredMovies.length)}
+                disabled={isTransitioning}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center bg-black/50 hover:bg-red-600 rounded-full transition-all duration-300 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+
+          {/* Content with Smooth Transition */}
+          <div
+            className={`relative z-10 px-10 lg:px-20 max-w-2xl transition-all duration-700 ${
+              isTransitioning ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"
+            }`}
+          >
             <p className="text-red-500 font-semibold mb-2">Featured</p>
             <h1 className="text-6xl font-extrabold mb-4 uppercase">{featured.title}</h1>
-            <p className="text-gray-300 mb-6">{featured.description || "No description available."}</p>
+            <p className="text-gray-300 mb-6">{featured.about || featured.description || "No description available."}</p>
 
             <div className="flex items-center gap-3 text-gray-400 text-sm mb-6">
               <span>{featured.year || "2022"}</span>
@@ -95,12 +161,16 @@ export default function Home() {
               </button>
             </div>
           </div>
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
-            {[...Array(3)].map((_, i) => (
-              <span
+          
+          {/* Pagination Dots */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+            {featuredMovies.map((_, i) => (
+              <button
                 key={i}
-                className={`w-3 h-3 rounded-full ${
-                  i === 0 ? "bg-white/80" : "bg-white/30"
+                onClick={() => goToFeatured(i)}
+                disabled={isTransitioning}
+                className={`h-3 rounded-full transition-all duration-500 disabled:cursor-not-allowed ${
+                  i === featuredIndex ? "bg-white/90 w-8" : "bg-white/40 hover:bg-white/60 w-3"
                 }`}
               />
             ))}
@@ -117,11 +187,10 @@ export default function Home() {
               setFilter(f);
               setSelectedGenre("All");
             }}
-            className={`px-4 py-2 rounded-full font-medium transition ${
-              filter === f
-                ? "bg-red-600 text-white"
-                : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-            }`}
+            className={`px-4 py-2 rounded-full font-medium transition ${filter === f
+              ? "bg-red-600 text-white"
+              : "bg-gray-700 hover:bg-gray-600 text-gray-300"
+              }`}
           >
             {f}
           </button>
@@ -169,7 +238,7 @@ export default function Home() {
                   </button>
                   <div
                     id={scrollId}
-                    className="ml-10 flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide pb-4"
+                    className="ml-10 mr-10 flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide pb-4"
                   >
                     {moviesInGenre.map((movie) => (
                       <div key={movie.id} className="flex-none w-[220px]">
@@ -191,39 +260,120 @@ export default function Home() {
 
       {/* 🎟️ MOVIE DETAILS MODAL */}
       {selectedMovie && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-40">
-          <div className="bg-white text-black p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="font-bold text-xl mb-3">{selectedMovie.title}</h3>
-            <div className="text-sm mb-4">
-              Runtime: {selectedMovie.runtime} mins <br />
-              Rating: {selectedMovie.rating} <br />
-              Price: ₱{selectedMovie.price}
+        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4 overflow-auto backdrop-blur-sm">
+          <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden border border-gray-700/50 animate-scale-in">
+
+            {/* Close Button - Floating Top Right */}
+            <button
+              onClick={() => setSelectedMovie(null)}
+              className="absolute top-4 right-4 z-30 w-10 h-10 flex items-center justify-center bg-black/60 hover:bg-red-600 rounded-full transition-all duration-300 backdrop-blur-sm group"
+            >
+              <svg className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Cinematic Banner Section */}
+            {selectedMovie.banner && (
+              <div className="relative w-full h-56 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent z-10"></div>
+                <img
+                  src={selectedMovie.banner}
+                  alt={`${selectedMovie.title} Banner`}
+                  className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700"
+                />
+                {/* Title on Banner */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
+                  <h2 className="text-4xl font-bold mb-2 text-white drop-shadow-2xl tracking-tight">
+                    {selectedMovie.title}
+                  </h2>
+                  <div className="h-1 w-20 bg-gradient-to-r from-red-600 to-red-400 rounded-full"></div>
+                </div>
+              </div>
+            )}
+
+            {/* Main Content: Poster + Details */}
+            <div className="grid md:grid-cols-3 gap-6 p-6">
+
+              {/* Poster */}
+              <div className="md:col-span-1">
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-t from-red-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                  <img
+                    src={selectedMovie.poster}
+                    alt={selectedMovie.title}
+                    className="w-full h-auto object-cover rounded-xl shadow-2xl border-2 border-gray-700/50 transform group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+              </div>
+
+              {/* Details */}
+              <div className="md:col-span-2 flex flex-col justify-between space-y-4">
+
+                {/* Genre Tags */}
+                {selectedMovie.genre && (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedMovie.genre.split(',').map((g, i) => (
+                      <span key={i} className="px-4 py-1.5 bg-gradient-to-r from-gray-700 to-gray-800 text-gray-200 text-sm rounded-full border border-gray-600 hover:border-red-500 transition-colors duration-300">
+                        {g.trim()}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* About */}
+                {selectedMovie.about && (
+                  <p className="text-gray-300 leading-relaxed text-base">
+                    {selectedMovie.about}
+                  </p>
+                )}
+
+                {/* Movie Info Grid */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 rounded-xl border border-gray-700/50 hover:border-red-500/50 transition-colors duration-300">
+                    <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Runtime</p>
+                    <p className="text-white text-lg font-semibold">{selectedMovie.runtime} mins</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 rounded-xl border border-gray-700/50 hover:border-red-500/50 transition-colors duration-300">
+                    <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Rating</p>
+                    <p className="text-white text-lg font-semibold">{selectedMovie.rating}</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-red-900 to-red-800 p-4 rounded-xl border border-red-700/50 hover:border-red-500 transition-colors duration-300">
+                    <p className="text-red-200 text-xs uppercase tracking-wider mb-1">Price</p>
+                    <p className="text-white text-lg font-semibold">₱{selectedMovie.price}</p>
+                  </div>
+                </div>
+
+                {/* Schedule */}
+                <div>
+                  <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Select a Schedule:
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {selectedMovie.schedule.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => {
+                          setSelectedSchedule(s);
+                          setShowSeatPicker(true);
+                        }}
+                        className="relative px-6 py-4 bg-gradient-to-r from-red-700 to-red-600 text-white rounded-xl font-medium hover:from-red-600 hover:to-red-500 hover:scale-105 hover:shadow-lg hover:shadow-red-500/50 transition-all duration-300 overflow-hidden group"
+                      >
+                        <span className="relative z-10">{formatFriendly(s)}</span>
+                        <div className="absolute inset-0 bg-white/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
             </div>
 
-            <h4 className="font-semibold mb-2">Select a Schedule:</h4>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {selectedMovie.schedule.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => {
-                    setSelectedSchedule(s);
-                    setShowSeatPicker(true);
-                  }}
-                  className="px-3 py-1 bg-slate-200 rounded hover:bg-slate-300"
-                >
-                  {formatFriendly(s)}
-                </button>
-              ))}
-            </div>
-
-            <div className="text-right">
-              <button
-                onClick={() => setSelectedMovie(null)}
-                className="px-4 py-1 bg-gray-300 rounded hover:bg-gray-400"
-              >
-                Close
-              </button>
-            </div>
+            {/* Bottom Gradient Bar */}
+            <div className="h-2 bg-gradient-to-r from-red-600 via-red-500 to-red-600"></div>
           </div>
         </div>
       )}
