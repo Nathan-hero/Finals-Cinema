@@ -41,19 +41,6 @@ const moviesData = [
     banner: "/banners/banner3.jpg",
   },
   {
-    id: "m4",
-    image: "/backgrounds/Wednesday.png",
-    title: "Wednesday",
-    runtime: 130,
-    rating: "PG",
-    price: 180,
-    featured: true,
-    genre: ["Mystery", "Comedy"],
-    schedule: ["2025-10-10T12:30", "2025-10-11T17:00"],
-    poster: "/poster/wednesday-poster.jpg",
-    description: "Smart, sarcastic, and a little dead inside, Wednesday Addams investigates twisted mysteries while making new friends—and foes—at Nevermore Academy."
-  },
-  {
     id: "m5",
     title: "Interstellar",
     genre: "Sci-Fi, Drama, Adventure",

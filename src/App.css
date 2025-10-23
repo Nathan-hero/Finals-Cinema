@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'MontserratBold';
+  src: url('fonts/Montserrat-Bold.ttf') format('opentype');
+}
+
 /* global.css */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;

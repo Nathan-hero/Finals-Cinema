@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, User } from "lucide-react";
 
 export default function Navbar({ user, onLogout, onSearch }) {
   const [query, setQuery] = useState("");
@@ -17,7 +17,7 @@ export default function Navbar({ user, onLogout, onSearch }) {
       {/* Left: Title */}
       <Link
         to="/"
-        className="text-red-600 font-extrabold text-2xl tracking-wide"
+        className="text-red-600 text-2xl tracking-wide MontserratBold"
       >
         CinEase
       </Link>
@@ -50,20 +50,32 @@ export default function Navbar({ user, onLogout, onSearch }) {
         >
           Movies
         </Link>
-        <Link
-          to="/dashboard"
-          className="hover:text-red-500 transition text-[17px] font-light"
-        >
-          Bookings
-        </Link>
+        
+        {/* ✅ Only show Bookings link when logged in */}
+        {user && (
+          <Link
+            to="/dashboard"
+            className="hover:text-red-500 transition text-[17px] font-light"
+          >
+            Bookings
+          </Link>
+        )}
 
         {user ? (
-          <button
-            onClick={onLogout}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-1.5 rounded-full transition"
-          >
-            Logout
-          </button>
+          <div className="flex items-center gap-4">
+            {/* ✅ Display user name with icon */}
+            <div className="flex items-center gap-2 bg-zinc-800 px-4 py-2 rounded-full">
+              <User size={18} className="text-red-500" />
+              <span className="text-white font-medium">{user.name}</span>
+            </div>
+            
+            <button
+              onClick={onLogout}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-1.5 rounded-full transition"
+            >
+              Logout
+            </button>
+          </div>
         ) : (
           <Link
             to="/auth"
