@@ -51,7 +51,7 @@ export default function Navbar({ user, onLogout, onSearch }) {
           Movies
         </Link>
         
-        {/* ✅ Only show Bookings link when logged in */}
+        {/* Only show Bookings link when logged in */}
         {user && (
           <Link
             to="/dashboard"
@@ -63,7 +63,7 @@ export default function Navbar({ user, onLogout, onSearch }) {
 
         {user ? (
           <div className="flex items-center gap-4">
-            {/* ✅ Display user name with icon */}
+            {/* Display user name with icon */}
             <div className="flex items-center gap-2 bg-zinc-800 px-4 py-2 rounded-full">
               <User size={18} className="text-red-500" />
               <span className="text-white font-medium">{user.name}</span>

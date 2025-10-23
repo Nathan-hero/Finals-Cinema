@@ -23,7 +23,7 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
     );
   }
 
-  // ✅ Updated to save to database
+  // Updated to save to database
   async function handleConfirm() {
     if (selectedSeats.length === 0) {
       alert("Please select at least one seat.");
@@ -41,7 +41,7 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
         totalPrice: selectedSeats.length * (movie.price || 150)
       };
 
-      // ✅ Save to database via API
+      // Save to database via API
       const result = await bookingAPI.createBooking(bookingData);
       
       console.log("Booking saved:", result);
