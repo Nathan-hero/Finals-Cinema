@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import API from "../utils/api"; // axios instance
+import API from "../utils/api";
 
 export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, setShowLogoutConfirm }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -8,24 +8,96 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  
+  // ✅ Validation states
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [nameError, setNameError] = useState("");
+
+  // ✅ Email validation - Now supports multiple domains
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      setEmailError("");
+      return false;
+    }
+    if (!emailRegex.test(email)) {
+      setEmailError("Invalid email format");
+      return false;
+    }
+    
+    // ✅ Check allowed domains
+    const allowedDomains = [
+      "@gmail.com",
+      "@yahoo.com",
+      "@outlook.com",
+      "@hotmail.com",
+      "@cinease.admin.com"  // Admin domain
+    ];
+    
+    const emailLower = email.toLowerCase();
+    const isAllowed = allowedDomains.some(domain => emailLower.endsWith(domain));
+    
+    if (!isAllowed) {
+      setEmailError("Only Gmail, Yahoo, Outlook, Hotmail, or CinEase Admin emails allowed");
+      return false;
+    }
+    
+    setEmailError("");
+    return true;
+  };
+
+  // ✅ Password validation
+  const validatePassword = (password) => {
+    if (!password) {
+      setPasswordError("");
+      return false;
+    }
+    if (password.length < 8) {
+      setPasswordError("Password must be at least 8 characters");
+      return false;
+    }
+    setPasswordError("");
+    return true;
+  };
+
+  // ✅ Name validation
+  const validateName = (name) => {
+    if (!name) {
+      setNameError("");
+      return false;
+    }
+    if (name.trim().length < 2) {
+      setNameError("Name must be at least 2 characters");
+      return false;
+    }
+    setNameError("");
+    return true;
+  };
 
   // Handle Registration
   const handleRegister = async (e) => {
     e.preventDefault();
     setErr("");
 
-    if (!name || !email || !password) return setErr("Fill all fields");
+    // ✅ Validate all fields
+    const isNameValid = validateName(name);
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+
+    if (!isNameValid || !isEmailValid || !isPasswordValid) {
+      setErr("Please fix the errors above");
+      return;
+    }
 
     try {
       const res = await API.post("/auth/register", { name, email, password });
-      console.log("Register response:", res.data); // 🔍 debug
       
       const user = res.data.user;
-      const token = res.data.token; // ✅ Get token from response
+      const token = res.data.token;
       
       if (!user || !token) return setErr("Registration failed. Please try again.");
 
-      // ✅ Save token and user to localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
 
@@ -45,18 +117,23 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
     e.preventDefault();
     setErr("");
 
-    if (!email || !password) return setErr("Fill all fields");
+    // ✅ Validate fields
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+
+    if (!isEmailValid || !isPasswordValid) {
+      setErr("Please fix the errors above");
+      return;
+    }
 
     try {
       const res = await API.post("/auth/login", { email, password });
-      console.log("Login response:", res.data); // 🔍 debug
       
       const user = res.data.user;
-      const token = res.data.token; // ✅ Get token from response
+      const token = res.data.token;
       
       if (!user || !token) return setErr("Login failed. Please try again.");
 
-      // ✅ Save token and user to localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
 
@@ -69,6 +146,15 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
       setShowSuccessModal(false);
       setErr(error.response?.data?.message || "Invalid credentials");
     }
+  };
+
+  // ✅ Clear errors when switching tabs
+  const switchTab = (loginMode) => {
+    setIsLogin(loginMode);
+    setErr("");
+    setEmailError("");
+    setPasswordError("");
+    setNameError("");
   };
 
   return (
@@ -132,7 +218,7 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
             className={`flex-1 py-2 font-semibold transition-colors ${
               isLogin ? "bg-red-600 text-white" : "bg-zinc-800 text-gray-400 hover:text-white"
             }`}
-            onClick={() => setIsLogin(true)}
+            onClick={() => switchTab(true)}
           >
             Login
           </button>
@@ -140,7 +226,7 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
             className={`flex-1 py-2 font-semibold transition-colors ${
               !isLogin ? "bg-red-600 text-white" : "bg-zinc-800 text-gray-400 hover:text-white"
             }`}
-            onClick={() => setIsLogin(false)}
+            onClick={() => switchTab(false)}
           >
             Signup
           </button>
@@ -149,30 +235,57 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
         {/* Form Fields */}
         <div>
           {!isLogin && (
-            <input
-              type="text"
-              placeholder="Name"
-              className="w-full mb-4 p-3 bg-zinc-800 border border-zinc-700 rounded text-gray-300 placeholder-gray-500 focus:outline-none focus:border-zinc-600"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="User Name"
+                className={`w-full p-3 bg-zinc-800 border ${
+                  nameError ? "border-red-500" : "border-zinc-700"
+                } rounded text-gray-300 placeholder-gray-500 focus:outline-none focus:border-zinc-600`}
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  validateName(e.target.value);
+                }}
+                onBlur={() => validateName(name)}
+              />
+              {nameError && <p className="text-red-500 text-xs mt-1">{nameError}</p>}
+            </div>
           )}
 
-          <input
-            type="email"
-            placeholder={isLogin ? "Email" : "Email"}
-            className="w-full mb-4 p-3 bg-zinc-800 border border-zinc-700 rounded text-gray-300 placeholder-gray-500 focus:outline-none focus:border-zinc-600"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <div className="mb-4">
+            <input
+              type="email"
+              placeholder="E-mail"
+              className={`w-full p-3 bg-zinc-800 border ${
+                emailError ? "border-red-500" : "border-zinc-700"
+              } rounded text-gray-300 placeholder-gray-500 focus:outline-none focus:border-zinc-600`}
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                validateEmail(e.target.value);
+              }}
+              onBlur={() => validateEmail(email)}
+            />
+            {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
+          </div>
           
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full mb-6 p-3 bg-zinc-800 border border-zinc-700 rounded text-gray-300 placeholder-gray-500 focus:outline-none focus:border-zinc-600"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="mb-6">
+            <input
+              type="password"
+              placeholder="Password (min 8 characters)"
+              className={`w-full p-3 bg-zinc-800 border ${
+                passwordError ? "border-red-500" : "border-zinc-700"
+              } rounded text-gray-300 placeholder-gray-500 focus:outline-none focus:border-zinc-600`}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                validatePassword(e.target.value);
+              }}
+              onBlur={() => validatePassword(password)}
+            />
+            {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
+          </div>
 
           {err && <p className="text-red-500 text-sm mb-4">{err}</p>}
 
@@ -188,7 +301,7 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <span
             className="text-red-600 cursor-pointer hover:text-red-500"
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => switchTab(!isLogin)}
           >
             {isLogin ? "Signup now" : "Login now"}
           </span>

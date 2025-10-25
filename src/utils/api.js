@@ -35,6 +35,14 @@ export const bookingAPI = {
     return response.data;
   },
 
+  // ✅ ADD THIS NEW FUNCTION
+  getBookedSeats: async (movieTitle, showtime) => {
+    const response = await API.get('/bookings/booked-seats', {
+      params: { movieTitle, showtime }
+    });
+    return response.data;
+  },
+
   // Delete a booking
   deleteBooking: async (bookingId) => {
     const response = await API.delete(`/bookings/${bookingId}`);

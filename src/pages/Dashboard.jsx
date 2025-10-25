@@ -6,12 +6,11 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ Check if user is logged in and fetch bookings
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
       setLoading(false);
-      return; // Don't fetch if not logged in
+      return;
     }
     fetchBookings();
   }, []);
@@ -27,7 +26,6 @@ export default function Dashboard() {
     } catch (err) {
       console.error("Error fetching bookings:", err);
       
-      // ✅ Handle 401 Unauthorized (not logged in)
       if (err.response?.status === 401) {
         setError("Please login to view your bookings");
       } else {
@@ -43,10 +41,7 @@ export default function Dashboard() {
 
     try {
       await bookingAPI.deleteBooking(bookingId);
-      
-      // Remove from local state
       setBookings(bookings.filter((b) => b._id !== bookingId));
-      
       alert("Booking cancelled successfully!");
     } catch (error) {
       console.error("Delete error:", error);
@@ -54,7 +49,6 @@ export default function Dashboard() {
     }
   }
 
-  // Format date nicely
   function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -66,7 +60,24 @@ export default function Dashboard() {
     });
   }
 
-  // ✅ Show login prompt if not logged in
+  // ✅ Helper function to safely display seats
+  function displaySeats(seats) {
+    if (!seats) return "No seats";
+    
+    // If it's already an array, join it
+    if (Array.isArray(seats)) {
+      return seats.join(", ");
+    }
+    
+    // If it's a string, return as is
+    if (typeof seats === 'string') {
+      return seats;
+    }
+    
+    // Fallback
+    return "N/A";
+  }
+
   if (!loading && !localStorage.getItem('token')) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
@@ -90,7 +101,10 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="text-white text-xl">Loading bookings...</div>
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mb-4"></div>
+          <p className="text-white text-xl">Loading bookings...</p>
+        </div>
       </div>
     );
   }
@@ -149,7 +163,10 @@ export default function Dashboard() {
                       <span className="text-gray-500">Showtime:</span> {booking.showtime}
                     </p>
                     <p>
-                      <span className="text-gray-500">Seats:</span> <span className="text-white font-semibold">{booking.seats.join(", ")}</span>
+                      <span className="text-gray-500">Seats:</span> 
+                      <span className="text-white font-semibold ml-2">
+                        {displaySeats(booking.seats)}
+                      </span>
                     </p>
                     <p>
                       <span className="text-gray-500">Booked on:</span> {formatDate(booking.bookingDate)}

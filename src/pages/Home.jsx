@@ -26,7 +26,11 @@ export default function Home() {
 
   const genres = useGenres(moviesData);
 
-  const handleConfirmSeats = () => setShowSeatPicker(false);
+  const handleConfirmSeats = () => {
+    setShowSeatPicker(false);
+    setSelectedMovie(null); // Close the movie modal
+    setSelectedSchedule(null); // Reset schedule
+  };
 
   return (
     <div className="min-h-screen bg-black text-white">
