@@ -44,20 +44,21 @@ export default function Navbar({ user, onLogout, onSearch }) {
 
       {/* Right: Navigation + Auth */}
       <div className="flex items-center gap-10">
-        <Link
-          to="/"
-          className="hover:text-red-500 transition text-[17px] font-light"
-        >
-          Movies
-        </Link>
-        
-        {/* Only show Bookings link when logged in */}
+        <button>
+          <Link
+            to="/"
+            className="hover:text-red-500 transition text-[17px] font-light"
+          >
+            Movies
+          </Link>
+        </button>
+        {/* Only show Bookings / dashboard link when logged in */}
         {user && (
           <Link
             to="/dashboard"
             className="hover:text-red-500 transition text-[17px] font-light"
           >
-            Bookings
+            Dashboard
           </Link>
         )}
 

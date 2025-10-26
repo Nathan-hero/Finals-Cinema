@@ -11,7 +11,7 @@ export default function App() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ Check for token and user on app load
+  // Check for token and user on app load
   useEffect(() => {
     const token = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
@@ -21,7 +21,7 @@ export default function App() {
     }
   }, []);
 
-  // ✅ Clear ALL auth data on logout
+  // Clear ALL auth data on logout
   function handleLogout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -35,7 +35,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-100 flex flex-col">
       <Navbar 
         user={user} 
-        onLogout={() => setShowLogoutConfirm(true)} // ✅ Show confirmation modal
+        onLogout={() => setShowLogoutConfirm(true)} // Show confirmation modal
       />
       
       {/* Logout Confirmation Modal */}
@@ -73,7 +73,6 @@ export default function App() {
         </Routes>
       </main>
       <footer className="text-center text-xs py-3 text-slate-500">
-        © 2025 CinEase — Vite + React + Tailwind
       </footer>
     </div>
   );

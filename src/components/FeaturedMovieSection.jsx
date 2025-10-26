@@ -64,7 +64,7 @@ export default function FeaturedMovieSection({
         <div className="flex gap-4">
           <button
             onClick={() => onSelectMovie(featured)}
-            className="bg-red-600 hover:bg-red-700 px-5 py-2 rounded-full font-semibold transition"
+            className="bg-red-600 hover:bg-red-800 px-5 py-2 rounded-full font-semibold transition"
           >
             Reserve Movie
           </button>
