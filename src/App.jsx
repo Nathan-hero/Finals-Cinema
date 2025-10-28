@@ -5,17 +5,19 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import AuthForm from "./components/AuthForm";
 import MovieDetails from "./pages/MovieDetails.jsx";
+import moviesData from "./data/moviesData";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   // Check for token and user on app load
   useEffect(() => {
     const token = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
-    
+
     if (token && savedUser) {
       setUser(JSON.parse(savedUser));
     }
@@ -31,13 +33,20 @@ export default function App() {
     navigate("/");
   }
 
+  // ✅ Handle search functionality
+  function handleSearch(query) {
+    setSearchQuery(query);
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col">
-      <Navbar 
-        user={user} 
-        onLogout={() => setShowLogoutConfirm(true)} // Show confirmation modal
+      <Navbar
+        user={user}
+        onLogout={() => setShowLogoutConfirm(true)} // ✅ Show confirmation modal
+        onSearch={handleSearch} // ✅ Pass search handler
+        moviesData={moviesData} // ✅ Pass movies data for search suggestions
       />
-      
+
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
@@ -66,7 +75,7 @@ export default function App() {
 
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={user ? <Home /> : <AuthForm onAuthSuccess={(u) => setUser(u)} />} />
+          <Route path="/" element={user ? <Home searchQuery={searchQuery} /> : <AuthForm onAuthSuccess={(u) => setUser(u)} />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/auth" element={<AuthForm onAuthSuccess={(u) => setUser(u)} />} />
           <Route path="/movie/:id" element={<MovieDetails />} />

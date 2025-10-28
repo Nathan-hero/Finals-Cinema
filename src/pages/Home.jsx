@@ -9,12 +9,21 @@ import MovieDetailsModal from "../components/MovieDetailsModal";
 import useFeaturedMovies from "../hooks/useFeaturedMovies";
 import useGenres from "../hooks/useGenres";
 
-export default function Home() {
+export default function Home({ searchQuery }) {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [showSeatPicker, setShowSeatPicker] = useState(false);
   const [filter, setFilter] = useState("All");
   const [selectedGenre, setSelectedGenre] = useState("All");
+
+  // Reset filter when search query changes
+  React.useEffect(() => {
+    if (searchQuery && searchQuery.trim()) {
+      setFilter("Search");
+    } else if (filter === "Search") {
+      setFilter("All");
+    }
+  }, [searchQuery, filter]);
 
   const {
     featuredMovies,
@@ -55,6 +64,9 @@ export default function Home() {
         genres={genres}
         moviesData={moviesData}
         onSelect={setSelectedMovie}
+        filter={filter}
+        selectedGenre={selectedGenre}
+        searchQuery={searchQuery}
       />
 
       <MovieDetailsModal
