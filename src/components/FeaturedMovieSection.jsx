@@ -91,9 +91,8 @@ export default function FeaturedMovieSection({
       </div>
     </section>
     
-<div className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 h-[1.5px] bg-gradient-to-r from-transparent via-white/90 to-transparent"></div>
-
-
+    <div className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 h-[1.5px] bg-gradient-to-r from-transparent via-white/90 to-transparent"></div>
+    
     </div>
   );
 }
