@@ -127,7 +127,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 pt-24">
+    <div className="min-h-screen bg-black text-white p-6 pb-24 pt-24">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
           <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
