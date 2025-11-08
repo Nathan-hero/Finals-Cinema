@@ -94,8 +94,10 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
   }
 
   return (
-    <nav className="bg-[#0D0D0D] text-white px-12 py-4 flex items-center justify-between shadow-md">
-      {/* Left: Title with Logo */}
+  <nav className="bg-[#0D0D0D] text-white px-12 py-4 grid grid-cols-3 items-center shadow-md relative z-[40]">
+
+    {/* LEFT COLUMN — Logo */}
+    <div className="flex items-center">
       <Link
         to="/"
         className="flex items-center text-red-600 text-2xl tracking-wide MontserratBold"
@@ -103,14 +105,15 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
         <img
           src="/CinEase Logo.png"
           alt="CinEase Logo"
-          className="h-24 w-auto"
+          className="h-16 w-auto"
         />
         CinEase
       </Link>
+    </div>
 
-      {/* Center: Search Bar | Also hidden when user is logged out*/}
-      <div className="relative" ref={searchRef}>
-        {user && (
+    {/* CENTER COLUMN — Search bar */}
+    <div className="relative flex justify-center z-0" ref={searchRef}>
+      {user && (
         <form
           onSubmit={handleSubmit}
           className="flex items-center bg-white rounded-full overflow-hidden w-[420px] shadow-inner"
@@ -132,84 +135,81 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
         </form>
       )}
 
-        {/* Search Suggestions Dropdown */}
-        {showSuggestions && suggestions.length > 0 && (
-          <div
-            ref={suggestionsRef}
-            className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-60 overflow-y-auto"
-          >
-            {suggestions.map((movie, index) => (
-              <div
-                key={movie.id}
-                onClick={() => handleSuggestionClick(movie)}
-                className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${index === selectedIndex
-                  ? 'bg-red-50 border-red-200'
-                  : 'hover:bg-gray-100'
-                  }`}
-              >
-                <div className="flex items-center gap-3">
-                  <img
-                    src={movie.poster}
-                    alt={movie.title}
-                    className="w-10 h-14 object-cover rounded"
-                    onError={(e) => {
-                      e.target.src = '/posters/poster1.jpg'; // Fallback image
-                    }}
-                  />
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900 text-sm">{movie.title}</h4>
-                    <p className="text-gray-500 text-xs">{movie.genre}</p>
-                  </div>
+      {/* Search Suggestions Dropdown */}
+      {showSuggestions && suggestions.length > 0 && (
+        <div
+          ref={suggestionsRef}
+          className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 w-[420px] bg-white rounded-lg shadow-lg border border-gray-200 z-[9] max-h-60 overflow-y-auto"
+        >
+          {suggestions.map((movie, index) => (
+            <div
+              key={movie.id}
+              onClick={() => handleSuggestionClick(movie)}
+              className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                index === selectedIndex ? "bg-red-50 border-red-200" : "hover:bg-gray-100"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <img
+                  src={movie.poster}
+                  alt={movie.title}
+                  className="w-10 h-14 object-cover rounded"
+                  onError={(e) => {
+                    e.currentTarget.src = "/posters/poster1.jpg";
+                  }}
+                />
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900 text-sm">{movie.title}</h4>
+                  <p className="text-gray-500 text-xs">{movie.genre}</p>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
 
-      {/* Right: Navigation + Auth */}
-      <div className="flex items-center gap-10">
+    {/* RIGHT COLUMN — Movies, Dashboard, User + Logout */}
+    <div className="flex items-center justify-end gap-10">
+      <Link
+        to="/"
+        className="hover:text-red-500 transition text-[17px] font-light"
+      >
+        Movies
+      </Link>
+
+      {user && (
         <Link
-          to="/"
+          to="/dashboard"
           className="hover:text-red-500 transition text-[17px] font-light"
         >
-          Movies
+          Dashboard
         </Link>
+      )}
 
-        {/* Only show Bookings link when logged in */}
-        {user && (
-          <Link
-            to="/dashboard"
-            className="hover:text-red-500 transition text-[17px] font-light"
-          >
-            Dashboard
-          </Link>
-        )}
-
-        {user ? (
-          <div className="flex items-center gap-4">
-            {/* Display user name with icon */}
-            <div className="flex items-center gap-2 bg-zinc-800 px-4 py-2 rounded-full">
-              <User size={18} className="text-red-500" />
-              <span className="text-white font-medium">{user.name}</span>
-            </div>
-
-            <button
-              onClick={onLogout}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-1.5 rounded-full transition"
-            >
-              Logout
-            </button>
+      {user ? (
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 bg-zinc-800 px-4 py-2 rounded-full">
+            <User size={18} className="text-red-500" />
+            <span className="text-white font-medium">{user.name}</span>
           </div>
-        ) : (
-          <Link
-            to="/auth"
+
+          <button
+            onClick={onLogout}
             className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-1.5 rounded-full transition"
           >
-            Login
-          </Link>
-        )}
-      </div>
-    </nav>
+            Logout
+          </button>
+        </div>
+      ) : (
+        <Link
+          to="/auth"
+          className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-1.5 rounded-full transition"
+        >
+          Login
+        </Link>
+      )}
+    </div>
+  </nav>
   );
 }
