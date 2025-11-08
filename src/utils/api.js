@@ -1,8 +1,11 @@
 import axios from "axios";
 
-// Create axios instance
+// ✅ Use Vite's environment variable syntax
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// Create axios instance with dynamic baseURL
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: `${API_URL}/api`,
 });
 
 // ✅ Add interceptor to automatically include token in every request
@@ -35,7 +38,7 @@ export const bookingAPI = {
     return response.data;
   },
 
-  // ✅ ADD THIS NEW FUNCTION
+  // ✅ Get booked seats for a movie/showtime
   getBookedSeats: async (movieTitle, showtime) => {
     const response = await API.get('/bookings/booked-seats', {
       params: { movieTitle, showtime }
