@@ -9,12 +9,12 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
   const [err, setErr] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   
-  // ✅ Validation states
+  // Validation states
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [nameError, setNameError] = useState("");
 
-  // ✅ Email validation - Now supports multiple domains
+  // Email validation - Now supports multiple domains
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
@@ -26,7 +26,7 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
       return false;
     }
     
-    // ✅ Check allowed domains
+    // Check allowed domains
     const allowedDomains = [
       "@gmail.com",
       "@yahoo.com",
@@ -47,7 +47,7 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
     return true;
   };
 
-  // ✅ Password validation
+  // Password validation
   const validatePassword = (password) => {
     if (!password) {
       setPasswordError("");
@@ -61,7 +61,7 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
     return true;
   };
 
-  // ✅ Name validation
+  // Name validation
   const validateName = (name) => {
     if (!name) {
       setNameError("");
@@ -80,7 +80,7 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
     e.preventDefault();
     setErr("");
 
-    // ✅ Validate all fields
+    // Validate all fields
     const isNameValid = validateName(name);
     const isEmailValid = validateEmail(email);
     const isPasswordValid = validatePassword(password);
@@ -117,7 +117,7 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
     e.preventDefault();
     setErr("");
 
-    // ✅ Validate fields
+    // Validate fields
     const isEmailValid = validateEmail(email);
     const isPasswordValid = validatePassword(password);
 

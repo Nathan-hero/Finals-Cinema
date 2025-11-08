@@ -108,8 +108,9 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
         CinEase
       </Link>
 
-      {/* Center: Search Bar */}
+      {/* Center: Search Bar | Also hidden when user is logged out*/}
       <div className="relative" ref={searchRef}>
+        {user && (
         <form
           onSubmit={handleSubmit}
           className="flex items-center bg-white rounded-full overflow-hidden w-[420px] shadow-inner"
@@ -129,6 +130,7 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
             <Search size={20} />
           </button>
         </form>
+      )}
 
         {/* Search Suggestions Dropdown */}
         {showSuggestions && suggestions.length > 0 && (
