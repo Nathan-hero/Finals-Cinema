@@ -12,6 +12,7 @@ export default function FeaturedMovieSection({
   if (!featured) return null;
 
   return (
+    <div>
     <section className="relative h-[80vh] flex items-center text-white overflow-hidden">
       {/* Background */}
       <div
@@ -51,15 +52,16 @@ export default function FeaturedMovieSection({
 
       {/* Text */}
       <div
-        className={`relative z-10 px-10 lg:px-20 max-w-2xl transition-all duration-700 ${
+        className={`relative z-10 px-10 lg:px-40 max-w-4xl transition-all duration-700 ${
           isTransitioning ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"
         }`}
       >
         <p className="text-red-500 font-semibold mb-2">Featured</p>
-        <h1 className="text-6xl font-extrabold mb-4 uppercase">{featured.title}</h1>
+        <h1 className="text-5xl font-extrabold mb-4 uppercase">{featured.title}</h1>
         <p className="text-gray-300 mb-6">
           {featured.about || featured.description || "No description available."}
         </p>
+        {/* Also add (RELEASE DATE)(MOVIE RATING)(DURATION) */}
 
         <div className="flex gap-4">
           <button
@@ -88,5 +90,10 @@ export default function FeaturedMovieSection({
         ))}
       </div>
     </section>
+    
+<div className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 h-[1.5px] bg-gradient-to-r from-transparent via-white/90 to-transparent"></div>
+
+
+    </div>
   );
 }
