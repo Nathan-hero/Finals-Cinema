@@ -7,6 +7,7 @@ import AuthForm from "./components/AuthForm";
 import MovieDetails from "./pages/MovieDetails.jsx";
 import moviesData from "./data/moviesData";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
+import Footer from "./components/Footer.jsx";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -82,8 +83,9 @@ export default function App() {
           <Route path="/movie/:id" element={<MovieDetails />} />
         </Routes>
       </main>
-      <footer className="text-center text-xs py-3 text-slate-500">
-      </footer>
+      
+      <Footer />
+
     </div>
   );
 }
