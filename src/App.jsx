@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import AuthForm from "./components/AuthForm";
 import MovieDetails from "./pages/MovieDetails.jsx";
 import moviesData from "./data/moviesData";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 
 export default function App() {
   const [user, setUser] = useState(null);
