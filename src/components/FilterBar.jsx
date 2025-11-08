@@ -9,7 +9,7 @@ export default function FilterBar({
   genres,
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-4 px-6 lg:px-10 py-4 bg-black">
+    <div className="flex flex-wrap items-center justify-center gap-4 px-6 lg:px-10 py-8 bg-black">
       {["All", "Featured"].map((f) => (
         <button
           key={f}
@@ -17,28 +17,34 @@ export default function FilterBar({
             setFilter(f);
             setSelectedGenre("All");
           }}
-          className={`px-4 py-2 rounded-full font-medium transition ${
-            filter === f
-              ? "bg-red-600 hover:bg-red-800 text-white"
-              : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-          }`}
+          className={`px-5 py-2 rounded-full font-medium text-sm border transition
+            ${filter === f
+              ? "bg-red-600 border-red-600 text-white hover:bg-red-700"
+              : "bg-[#1a1a1a] border-white text-white hover:bg-gray-700"
+            }`}
         >
           {f}
         </button>
       ))}
 
-      <select
-        value={selectedGenre}
-        onChange={(e) => {
-          setSelectedGenre(e.target.value);
-          setFilter("Genre");
-        }}
-        className="px-4 py-2 rounded-full bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer"
-      >
-        {genres.map((g) => (
-          <option key={g}>{g}</option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          value={selectedGenre}
+          onChange={(e) => {
+            setSelectedGenre(e.target.value);
+            setFilter("Genre");
+          }}
+          className="appearance-none px-5 py-2 rounded-full bg-[#1a1a1a] border border-white text-white text-sm cursor-pointer hover:bg-gray-700 pr-10"
+        >
+          {genres.map((g) => (
+            <option key={g} className="bg-black text-white">{g}</option>
+          ))}
+        </select>
+
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white text-xs">
+          ▼
+        </span>
+      </div>
     </div>
   );
 }
