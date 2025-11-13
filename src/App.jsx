@@ -79,11 +79,12 @@ export default function App() {
         <Routes>
           <Route path="/" element={user ? <Home searchQuery={searchQuery} /> : <AuthForm onAuthSuccess={(u) => setUser(u)} />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/auth" element={<AuthForm onAuthSuccess={(u) => setUser(u)} />} />
           <Route path="/movie/:id" element={<MovieDetails />} />
         </Routes>
       </main>
-      
+
       <Footer />
 
     </div>
