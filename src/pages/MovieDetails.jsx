@@ -1,17 +1,78 @@
-
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { moviesAPI } from "../utils/api";
 import moviesData from "../data/moviesData";
 
 export default function MovieDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [movie, setMovie] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const movie = moviesData.find((m) => m.id === id);
+  useEffect(() => {
+    async function fetchMovie() {
+      const fallbackMovie = moviesData.find((m) => m.id === id);
+      const isLikelyMongoId = /^[0-9a-fA-F]{24}$/.test(id ?? "");
 
-  if (!movie) {
+      if (fallbackMovie && !isLikelyMongoId) {
+        setMovie(fallbackMovie);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const backendMovie = await moviesAPI.getMovieById(id);
+        
+        // Map backend fields to frontend format
+        const mappedMovie = {
+          id: backendMovie._id,
+          title: backendMovie.title,
+          genre: Array.isArray(backendMovie.genre) ? backendMovie.genre.join(", ") : backendMovie.genre,
+          runtime: backendMovie.duration,
+          rating: backendMovie.movieRating,
+          price: 210, // Default price, you can add this to backend if needed
+          featured: backendMovie.featured || false,
+          schedule: ["2025-10-10T15:00", "2025-10-10T19:00", "2025-10-11T13:30"], // Default schedule
+          about: backendMovie.description,
+          poster: backendMovie.posterURL,
+          banner: backendMovie.bannerURL,
+        };
+        
+        setMovie(mappedMovie);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching movie:", err);
+        if (fallbackMovie) {
+          setMovie(fallbackMovie);
+          setError(null);
+        } else {
+          setError("Failed to load movie");
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) {
+      fetchMovie();
+    }
+  }, [id]);
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-black bg-black">
-        <h1 className="text-2xl font-bold mb-4">Movie Not Found</h1>
+      <div className="min-h-screen flex flex-col items-center justify-center text-white bg-black">
+        <p className="text-gray-400 text-xl">Loading movie details...</p>
+      </div>
+    );
+  }
+
+  if (error || !movie) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-white bg-black">
+        <h1 className="text-2xl font-bold mb-4">{error || "Movie Not Found"}</h1>
         <button
           onClick={() => navigate("/")}
           className="bg-red-600 hover:bg-red-700 px-5 py-2 rounded-full font-semibold transition"

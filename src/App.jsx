@@ -8,11 +8,13 @@ import MovieDetails from "./pages/MovieDetails.jsx";
 import moviesData from "./data/moviesData";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import Footer from "./components/Footer.jsx";
+import { moviesAPI } from "./utils/api";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [movies, setMovies] = useState(moviesData); // Default to static data
   const navigate = useNavigate();
 
   // Check for token and user on app load
@@ -23,6 +25,62 @@ export default function App() {
     if (token && savedUser) {
       setUser(JSON.parse(savedUser));
     }
+  }, []);
+
+  // Fetch movies from API
+  useEffect(() => {
+    async function fetchMovies() {
+      try {
+        const backendMovies = await moviesAPI.getAllMovies();
+
+        // Map backend fields to frontend format
+        const mappedMovies = backendMovies.map((movie) => ({
+          id: movie._id,
+          title: movie.title,
+          genre: Array.isArray(movie.genre) ? movie.genre.join(", ") : movie.genre,
+          runtime: movie.duration,
+          rating: movie.movieRating,
+          price: 210, // Default price, you can add this to backend if needed
+          featured: movie.featured || false,
+          schedule: ["2025-10-10T15:00", "2025-10-10T19:00", "2025-10-11T13:30"], // Default schedule
+          about: movie.description,
+          poster: movie.posterURL,
+          banner: movie.bannerURL,
+        }));
+
+        // Merge backend movies into fallback data by title
+        const fallbackByTitle = new Map(
+          moviesData.map((movie) => [movie.title.toLowerCase(), movie])
+        );
+        const backendByTitle = new Map(
+          mappedMovies.map((movie) => [movie.title.toLowerCase(), movie])
+        );
+
+        const mergedMovies = moviesData.map((fallbackMovie) => {
+          const backendMatch = backendByTitle.get(fallbackMovie.title.toLowerCase());
+          if (backendMatch) {
+            return {
+              ...fallbackMovie,
+              ...backendMatch,
+            };
+          }
+          return fallbackMovie;
+        });
+
+        mappedMovies.forEach((backendMovie) => {
+          if (!fallbackByTitle.has(backendMovie.title.toLowerCase())) {
+            mergedMovies.push(backendMovie);
+          }
+        });
+
+        setMovies(mergedMovies);
+      } catch (err) {
+        console.error("Error fetching movies:", err);
+        // Keep static data as fallback
+      }
+    }
+
+    fetchMovies();
   }, []);
 
   // Clear ALL auth data on logout
@@ -46,7 +104,7 @@ export default function App() {
         user={user}
         onLogout={() => setShowLogoutConfirm(true)} // ✅ Show confirmation modal
         onSearch={handleSearch} // ✅ Pass search handler
-        moviesData={moviesData} // ✅ Pass movies data for search suggestions
+        moviesData={movies} // ✅ Pass fetched movies data for search suggestions
       />
 
       {/* Logout Confirmation Modal */}
@@ -77,7 +135,7 @@ export default function App() {
 
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={user ? <Home searchQuery={searchQuery} /> : <AuthForm onAuthSuccess={(u) => setUser(u)} />} />
+          <Route path="/" element={user ? <Home searchQuery={searchQuery} movies={movies} /> : <AuthForm onAuthSuccess={(u) => setUser(u)} />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/auth" element={<AuthForm onAuthSuccess={(u) => setUser(u)} />} />

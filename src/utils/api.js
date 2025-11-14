@@ -24,6 +24,21 @@ API.interceptors.request.use(
 
 export default API;
 
+// Movies API functions
+export const moviesAPI = {
+  // Get all movies
+  getAllMovies: async () => {
+    const response = await API.get('/movies');
+    return response.data;
+  },
+
+  // Get a single movie by ID
+  getMovieById: async (id) => {
+    const response = await API.get(`/movies/${id}`);
+    return response.data;
+  },
+};
+
 // Add booking API functions
 export const bookingAPI = {
   // Create a new booking
