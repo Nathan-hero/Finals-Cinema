@@ -157,7 +157,7 @@ export default function App() {
                 user.role === "admin" ? (
                   <AdminDashboard />
                 ) : (
-                  <Home searchQuery={searchQuery} movies={movies} />
+                  <Home searchQuery={searchQuery} movies={movies} user={user} />
                 )
               ) : (
                 <AuthForm onAuthSuccess={handleAuthSuccess} />
@@ -182,7 +182,7 @@ export default function App() {
           />
           <Route 
             path="/admin/movies" 
-            element={<Home searchQuery={searchQuery} movies={movies} isAdminView={true} />} 
+            element={<Home searchQuery={searchQuery} movies={movies} isAdminView={true} user={user} />} 
           />
           <Route 
             path="/admin/movie/:id" 

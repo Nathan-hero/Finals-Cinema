@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { bookingAPI } from "../../../utils/api";
 
-export default function SeatPicker({ show, onClose, movie, selectedSchedule, onConfirm }) {
+export default function SeatPicker({ show, onClose, movie, selectedSchedule, onConfirm, isAdmin }) {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [bookedSeats, setBookedSeats] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -54,6 +54,8 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
   }
 
   function toggleSeat(seat) {
+    // Don't allow selecting seats if admin
+    if (isAdmin) return;
     // Don't allow selecting already booked seats
     if (bookedSeats.includes(seat)) return;
     
@@ -65,6 +67,12 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
   }
 
   async function handleConfirm() {
+    // Prevent admin from booking
+    if (isAdmin) {
+      alert("Admin accounts cannot make bookings. This is a view-only mode.");
+      return;
+    }
+
     if (selectedSeats.length === 0) {
       alert("Please select at least one seat.");
       return;
@@ -275,12 +283,14 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
                           <button
                             key={seatNum}
                             onClick={() => toggleSeat(seatNum)}
-                            disabled={loading || isBooked}
+                            disabled={loading || isBooked || isAdmin}
                             className={`w-9 h-9 rounded-lg font-semibold text-xs transition-all duration-300 border-2 ${
                               !isVisible
                                 ? "opacity-20 scale-90"
                                 : isBooked
                                 ? "bg-gray-900 border-gray-800 text-gray-600 cursor-not-allowed opacity-50"
+                                : isAdmin
+                                ? "bg-gray-900 border-gray-700 text-gray-500 cursor-not-allowed opacity-40"
                                 : isSelected
                                 ? "bg-gradient-to-br from-red-600 to-red-500 border-red-400 text-white shadow-lg shadow-red-500/50 scale-110"
                                 : "bg-gradient-to-br from-gray-700 to-gray-800 border-gray-600 text-gray-300 hover:border-red-400 hover:scale-105 hover:shadow-md"
@@ -333,10 +343,10 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
             </button>
             <button
               onClick={handleConfirm}
-              disabled={loading || fetchingSeats || selectedSeats.length === 0}
+              disabled={loading || fetchingSeats || selectedSeats.length === 0 || isAdmin}
               className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-medium hover:from-red-500 hover:to-red-400 hover:shadow-lg hover:shadow-red-500/50 transition-all duration-300 border border-red-400 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
             >
-              {loading ? "Booking..." : "Confirm Booking"}
+              {isAdmin ? "Booking Disabled (Admin)" : loading ? "Booking..." : "Confirm Booking"}
             </button>
           </div>
         </div>

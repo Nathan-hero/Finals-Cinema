@@ -10,7 +10,7 @@ import useFeaturedMovies from "../../../shared/hooks/useFeaturedMovies";
 import useGenres from "../../../shared/hooks/useGenres";
 import { moviesAPI } from "../../../utils/api";
 
-export default function Home({ searchQuery, movies: propMovies }) {
+export default function Home({ searchQuery, movies: propMovies, user, isAdminView }) {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [showSeatPicker, setShowSeatPicker] = useState(false);
@@ -158,6 +158,7 @@ export default function Home({ searchQuery, movies: propMovies }) {
           setSelectedSchedule(schedule);
           setShowSeatPicker(true);
         }}
+        isAdmin={user?.role === "admin" || isAdminView}
       />
 
       <SeatPicker
@@ -166,6 +167,7 @@ export default function Home({ searchQuery, movies: propMovies }) {
         movie={selectedMovie}
         selectedSchedule={selectedSchedule}
         onConfirm={handleConfirmSeats}
+        isAdmin={user?.role === "admin" || isAdminView}
       />
     </div>
   );
