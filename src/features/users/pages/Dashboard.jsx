@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { bookingAPI } from "../utils/api";
+import { bookingAPI } from "../../../utils/api";
 
 export default function Dashboard() {
   const [bookings, setBookings] = useState([]);

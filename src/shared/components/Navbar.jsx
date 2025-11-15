@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Search, User } from "lucide-react";
 
 export default function Navbar({ user, onLogout, onSearch, moviesData }) {
@@ -8,6 +8,7 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
   const [suggestions, setSuggestions] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const navigate = useNavigate();
+  const location = useLocation();
   const searchRef = useRef(null);
   const suggestionsRef = useRef(null);
 
@@ -15,7 +16,13 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
     e.preventDefault();
     if (onSearch) onSearch(query.trim());
     setShowSuggestions(false);
-    navigate("/"); // Return to Home for results
+
+    // Navigate to appropriate movies page based on user role
+    if (user && user.role === "admin") {
+      navigate("/admin/movies");
+    } else {
+      navigate("/");
+    }
   }
 
   // Generate search suggestions based on query
@@ -24,11 +31,11 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
       const filteredMovies = moviesData.filter((movie) =>
         movie.title.toLowerCase().includes(query.toLowerCase()) ||
         movie.genre.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 5); // Limit to 5 suggestions
+      ).slice(0, 5);
 
       setSuggestions(filteredMovies);
       setShowSuggestions(true);
-      setSelectedIndex(-1); // Reset selection when suggestions change
+      setSelectedIndex(-1);
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -60,7 +67,13 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
     setQuery(movie.title);
     if (onSearch) onSearch(movie.title);
     setShowSuggestions(false);
-    navigate("/");
+
+    // Navigate to appropriate movies page based on user role
+    if (user && user.role === "admin") {
+      navigate("/admin/movies");
+    } else {
+      navigate("/");
+    }
   }
 
   // Handle keyboard navigation
@@ -94,12 +107,12 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
   }
 
   return (
-    <nav className="bg-[#0D0D0D] text-white px-12 py-4 grid grid-cols-3 items-center shadow-md relative z-[40]">
+    <nav className="bg-[#0D0D0D] text-white px-12 py-4 grid grid-cols-[auto_1fr_auto] items-center shadow-md relative z-[40]">
 
       {/* LEFT COLUMN — Logo */}
       <div className="flex items-center">
         <Link
-          to="/"
+          to={user && user.role === "admin" ? "/admin" : "/"}
           className="flex items-center text-red-600 text-2xl tracking-wide MontserratBold"
         >
           <img
@@ -168,22 +181,46 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
         )}
       </div>
 
-      {/* RIGHT COLUMN — Movies, Dashboard, User + Logout */}
+      {/* RIGHT COLUMN — Navigation based on user role */}
       <div className="flex items-center justify-end gap-10">
-        <Link
-          to="/"
-          className="hover:text-red-500 transition text-[17px] font-light"
-        >
-          Movies
-        </Link>
-
-        {user && (
-          <Link
-            to="/dashboard"
-            className="hover:text-red-500 transition text-[17px] font-light"
-          >
-            Dashboard
-          </Link>
+        {user && user.role === "admin" ? (
+          // Admin Navigation
+          <>
+            <Link
+              to="/admin/movies"
+              className={`hover:text-red-500 transition text-[17px] font-light ${location.pathname === "/admin/movies" ? "text-red-500" : ""
+                }`}
+            >
+              Movies
+            </Link>
+            <Link
+              to="/admin"
+              className={`hover:text-red-500 transition text-[17px] font-light ${location.pathname === "/admin" ? "text-red-500" : ""
+                }`}
+            >
+              Dashboard
+            </Link>
+          </>
+        ) : (
+          // Regular User Navigation
+          <>
+            <Link
+              to="/"
+              className={`hover:text-red-500 transition text-[17px] font-light ${location.pathname === "/" ? "text-red-500" : ""
+                }`}
+            >
+              Movies
+            </Link>
+            {user && (
+              <Link
+                to="/dashboard"
+                className={`hover:text-red-500 transition text-[17px] font-light ${location.pathname === "/dashboard" ? "text-red-500" : ""
+                  }`}
+              >
+                Dashboard
+              </Link>
+            )}
+          </>
         )}
 
         {user ? (
@@ -191,6 +228,9 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
             <div className="flex items-center gap-2 bg-zinc-800 px-4 py-2 rounded-full">
               <User size={18} className="text-red-500" />
               <span className="text-white font-medium">{user.name}</span>
+              {user.role === "admin" && (
+                <span className="ml-1 text-xs text-gray-400">(Admin)</span>
+              )}
             </div>
 
             <button

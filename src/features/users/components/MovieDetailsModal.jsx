@@ -1,6 +1,6 @@
 // src/components/MovieDetailsModal.jsx
 import React, { useState, useEffect } from "react";
-import { formatFriendly } from "../utils/format";
+import { formatFriendly } from "../../../utils/format";
 
 export default function MovieDetailsModal({ movie, onClose, onSelectSchedule }) {
   const [showSchedules, setShowSchedules] = useState(false);

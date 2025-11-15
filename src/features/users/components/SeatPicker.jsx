@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { bookingAPI } from "../utils/api";
+import { bookingAPI } from "../../../utils/api";
 
 export default function SeatPicker({ show, onClose, movie, selectedSchedule, onConfirm }) {
   const [selectedSeats, setSelectedSeats] = useState([]);

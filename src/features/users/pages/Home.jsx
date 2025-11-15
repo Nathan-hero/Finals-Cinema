@@ -1,14 +1,14 @@
 // src/pages/Home.jsx
 import React, { useState, useEffect } from "react";
-import moviesData from "../data/moviesData";
+import moviesData from "../../../shared/data/moviesData";
 import SeatPicker from "../components/SeatPicker";
 import FeaturedMovieSection from "../components/FeaturedMovieSection";
 import FilterBar from "../components/FilterBar";
 import GenreMovieList from "../components/GenreMovieList";
 import MovieDetailsModal from "../components/MovieDetailsModal";
-import useFeaturedMovies from "../hooks/useFeaturedMovies";
-import useGenres from "../hooks/useGenres";
-import { moviesAPI } from "../utils/api";
+import useFeaturedMovies from "../../../shared/hooks/useFeaturedMovies";
+import useGenres from "../../../shared/hooks/useGenres";
+import { moviesAPI } from "../../../utils/api";
 
 export default function Home({ searchQuery, movies: propMovies }) {
   const [selectedMovie, setSelectedMovie] = useState(null);

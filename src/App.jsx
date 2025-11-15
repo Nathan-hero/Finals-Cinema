@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
-import AuthForm from "./components/AuthForm";
-import MovieDetails from "./pages/MovieDetails.jsx";
-import moviesData from "./data/moviesData";
-import AdminDashboard from "./pages/AdminDashboard.jsx";
-import Footer from "./components/Footer.jsx";
+import Navbar from "./shared/components/Navbar.jsx";
+import Home from "./features/users/pages/Home.jsx";
+import Dashboard from "./features/users/pages/Dashboard.jsx";
+import AuthForm from "./features/users/components/AuthForm.jsx";
+import MovieDetails from "./features/users/pages/MovieDetails.jsx";
+import moviesData from "./shared/data/moviesData.js";
+import AdminDashboard from "./features/admin/pages/AdminDashboard";
+import Footer from "./shared/components/Footer.jsx";
 import { moviesAPI } from "./utils/api";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [movies, setMovies] = useState(moviesData); // Default to static data
+  const [movies, setMovies] = useState(moviesData);
   const navigate = useNavigate();
 
   // Check for token and user on app load
@@ -23,9 +23,15 @@ export default function App() {
     const savedUser = localStorage.getItem("user");
 
     if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
+      
+      // ✅ Redirect admin to /admin page on app load (only from root)
+      if (parsedUser.role === "admin" && window.location.pathname === "/") {
+        navigate("/admin");
+      }
     }
-  }, []);
+  }, [navigate]);
 
   // Fetch movies from API
   useEffect(() => {
@@ -33,22 +39,20 @@ export default function App() {
       try {
         const backendMovies = await moviesAPI.getAllMovies();
 
-        // Map backend fields to frontend format
         const mappedMovies = backendMovies.map((movie) => ({
           id: movie._id,
           title: movie.title,
           genre: Array.isArray(movie.genre) ? movie.genre.join(", ") : movie.genre,
           runtime: movie.duration,
           rating: movie.movieRating,
-          price: 210, // Default price, you can add this to backend if needed
+          price: 210,
           featured: movie.featured || false,
-          schedule: ["2025-10-10T15:00", "2025-10-10T19:00", "2025-10-11T13:30"], // Default schedule
+          schedule: ["2025-10-10T15:00", "2025-10-10T19:00", "2025-10-11T13:30"],
           about: movie.description,
           poster: movie.posterURL,
           banner: movie.bannerURL,
         }));
 
-        // Merge backend movies into fallback data by title
         const fallbackByTitle = new Map(
           moviesData.map((movie) => [movie.title.toLowerCase(), movie])
         );
@@ -76,7 +80,6 @@ export default function App() {
         setMovies(mergedMovies);
       } catch (err) {
         console.error("Error fetching movies:", err);
-        // Keep static data as fallback
       }
     }
 
@@ -87,24 +90,35 @@ export default function App() {
   function handleLogout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    localStorage.removeItem("cbs_auth_v1"); // Remove old key if it exists
+    localStorage.removeItem("cbs_auth_v1");
     setUser(null);
-    setShowLogoutConfirm(false); // Close the modal
+    setShowLogoutConfirm(false);
     navigate("/");
   }
 
-  // ✅ Handle search functionality
   function handleSearch(query) {
     setSearchQuery(query);
+  }
+
+  // ✅ Handle successful authentication with role-based redirect
+  function handleAuthSuccess(authenticatedUser) {
+    setUser(authenticatedUser);
+    
+    // Redirect based on user role
+    if (authenticatedUser.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/");
+    }
   }
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col">
       <Navbar
         user={user}
-        onLogout={() => setShowLogoutConfirm(true)} // ✅ Show confirmation modal
-        onSearch={handleSearch} // ✅ Pass search handler
-        moviesData={movies} // ✅ Pass fetched movies data for search suggestions
+        onLogout={() => setShowLogoutConfirm(true)}
+        onSearch={handleSearch}
+        moviesData={movies}
       />
 
       {/* Logout Confirmation Modal */}
@@ -135,16 +149,55 @@ export default function App() {
 
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={user ? <Home searchQuery={searchQuery} movies={movies} /> : <AuthForm onAuthSuccess={(u) => setUser(u)} />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/auth" element={<AuthForm onAuthSuccess={(u) => setUser(u)} />} />
-          <Route path="/movie/:id" element={<MovieDetails />} />
+          {/* Root route - Login or User Home */}
+          <Route 
+            path="/" 
+            element={
+              user ? (
+                user.role === "admin" ? (
+                  <AdminDashboard />
+                ) : (
+                  <Home searchQuery={searchQuery} movies={movies} />
+                )
+              ) : (
+                <AuthForm onAuthSuccess={handleAuthSuccess} />
+              )
+            } 
+          />
+
+          {/* User Routes */}
+          <Route 
+            path="/dashboard" 
+            element={<Dashboard />} 
+          />
+          <Route 
+            path="/movie/:id" 
+            element={<MovieDetails />} 
+          />
+
+          {/* Admin Routes */}
+          <Route 
+            path="/admin" 
+            element={<AdminDashboard />} 
+          />
+          <Route 
+            path="/admin/movies" 
+            element={<Home searchQuery={searchQuery} movies={movies} isAdminView={true} />} 
+          />
+          <Route 
+            path="/admin/movie/:id" 
+            element={<MovieDetails isAdminView={true} />} 
+          />
+
+          {/* Auth Route */}
+          <Route 
+            path="/auth" 
+            element={<AuthForm onAuthSuccess={handleAuthSuccess} />} 
+          />
         </Routes>
       </main>
 
       <Footer />
-
     </div>
   );
 }

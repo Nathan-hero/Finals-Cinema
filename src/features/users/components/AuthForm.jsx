@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import API from "../utils/api";
+import API from "../../../utils/api";
 
 export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, setShowLogoutConfirm }) {
   const [isLogin, setIsLogin] = useState(true);

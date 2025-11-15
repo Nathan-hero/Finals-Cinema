@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { moviesAPI } from "../utils/api";
-import moviesData from "../data/moviesData";
+import { moviesAPI } from "../../../utils/api";
+import moviesData from "../../../shared/data/moviesData";
 
 export default function MovieDetails() {
   const { id } = useParams();
