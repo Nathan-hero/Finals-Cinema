@@ -32,7 +32,7 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
           </svg>
         </button>
 
-        {!showSchedules || isAdmin ? (
+        {!showSchedules ? (
           // STEP 1: Movie Details Only
           <>
             {/* Banner */}
@@ -105,24 +105,15 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
                 </div>
 
                 {/* Book Now Button */}
-                {isAdmin ? (
-                  <div className="w-full bg-gradient-to-r from-gray-700 to-gray-600 text-white py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 cursor-not-allowed opacity-60">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                    </svg>
-                    Booking Not Available (Admin View)
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setShowSchedules(true)}
-                    className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-4 rounded-xl font-bold text-lg hover:from-red-500 hover:to-red-400 hover:shadow-lg hover:shadow-red-500/50 transition-all duration-300 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                    </svg>
-                    Book Now
-                  </button>
-                )}
+                <button
+                  onClick={() => setShowSchedules(true)}
+                  className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-4 rounded-xl font-bold text-lg hover:from-red-500 hover:to-red-400 hover:shadow-lg hover:shadow-red-500/50 transition-all duration-300 flex items-center justify-center gap-2"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                  </svg>
+                  {isAdmin ? "View Schedules" : "Book Now"}
+                </button>
               </div>
             </div>
 
@@ -157,44 +148,43 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
                 </p>
               </div>
 
-              {isAdmin ? (
-                <div className="text-center py-12">
-                  <div className="inline-block p-6 bg-gray-800/50 rounded-xl border border-gray-700">
-                    <svg className="w-16 h-16 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                    </svg>
-                    <p className="text-gray-400 text-lg font-semibold">Booking Not Available</p>
-                    <p className="text-gray-500 text-sm mt-2">Admin accounts can only view movie details</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                  {movie.schedule.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => onSelectSchedule(s)}
-                      className="group relative px-6 py-6 bg-gradient-to-br from-gray-800 to-gray-900 text-white rounded-xl font-medium border-2 border-gray-700 hover:border-red-500 hover:scale-105 transition-all duration-300 overflow-hidden"
-                    >
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                {movie.schedule.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => !isAdmin && onSelectSchedule(s)}
+                    disabled={isAdmin}
+                    className={`group relative px-6 py-6 bg-gradient-to-br from-gray-800 to-gray-900 text-white rounded-xl font-medium border-2 transition-all duration-300 overflow-hidden ${
+                      isAdmin 
+                        ? "border-gray-700 cursor-default opacity-75" 
+                        : "border-gray-700 hover:border-red-500 hover:scale-105"
+                    }`}
+                  >
                     <div className="absolute inset-0 bg-gradient-to-r from-red-600/0 to-red-600/0 group-hover:from-red-600/10 group-hover:to-red-500/10 transition-all duration-300"></div>
                     <div className="relative z-10">
                       <div className="text-sm text-gray-400 mb-1">Showtime</div>
                       <div className="text-xl font-bold">{formatFriendly(s)}</div>
                     </div>
-                    <svg className="absolute bottom-2 right-2 w-5 h-5 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                    {!isAdmin && (
+                      <svg className="absolute bottom-2 right-2 w-5 h-5 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    )}
                   </button>
-                  ))}
-                </div>
-              )}
+                ))}
+              </div>
 
-              {!isAdmin && (
-                <div className="mt-8 text-center">
+              <div className="mt-8 text-center">
+                {isAdmin ? (
+                  <p className="text-sm text-gray-500">
+                    View-only mode: Schedules are displayed for reference only
+                  </p>
+                ) : (
                   <p className="text-sm text-gray-500">
                     Select a schedule to proceed to seat selection
                   </p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Bottom Bar */}
