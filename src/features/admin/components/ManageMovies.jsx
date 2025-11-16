@@ -6,28 +6,23 @@ export default function ManageMovies() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [movies, setMovies] = useState(moviesData);
 
-  // Tracks which rows are selected
   const [selectedIndexes, setSelectedIndexes] = useState([]);
 
-  // Checkbox handler (allows multi-select)
   function handleSelect(index) {
-    // If already selected → remove from selection
     if (selectedIndexes.includes(index)) {
       setSelectedIndexes(selectedIndexes.filter(i => i !== index));
       return;
     }
 
-    // Add selection (multi-select allowed)
     setSelectedIndexes([...selectedIndexes, index]);
   }
 
   // Button validation
   const isEditEnabled = selectedIndexes.length === 1;     // exactly 1
   const isRemoveEnabled = selectedIndexes.length >= 1;    // 1 or more
+  const isAddEnabled = selectedIndexes.length === 0;
 
-  // ===========================
-  // 🔥 PAGINATION
-  // ===========================
+  // PAGINATION
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -48,8 +43,13 @@ export default function ManageMovies() {
 
           {/* Add Movie */}
           <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-white text-black text-sm font-semibold px-4 py-1.5 rounded-full hover:bg-gray-200 w-44"
+            onClick={() => isAddEnabled && setShowAddModal(true)}
+            disabled={!isAddEnabled}
+            className={`text-sm font-semibold px-4 py-1.5 rounded-full w-44
+            ${isAddEnabled
+                ? "bg-white text-black hover:bg-gray-200 cursor-pointer"
+                : "bg-gray-600 text-gray-300 cursor-not-allowed"
+              }`}
           >
             Add Movie
           </button>
