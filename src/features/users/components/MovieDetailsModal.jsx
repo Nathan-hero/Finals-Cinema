@@ -11,6 +11,13 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
 
   if (!movie) return null;
 
+  // 🔥 FIX: Support both old format (schedule) and new format (schedules)
+  const movieSchedules = movie.schedules || movie.schedule || [];
+  const hasSchedules = movieSchedules.length > 0;
+
+  // 🔥 FIX: Check if schedules are objects (new format) or strings (old format)
+  const isNewFormat = hasSchedules && typeof movieSchedules[0] === 'object' && movieSchedules[0].cinema;
+
   return (
     <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4 overflow-auto backdrop-blur-sm">
       <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden border border-gray-700/50 animate-scale-in">
@@ -107,12 +114,13 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
                 {/* Book Now Button */}
                 <button
                   onClick={() => setShowSchedules(true)}
-                  className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-4 rounded-xl font-bold text-lg hover:from-red-500 hover:to-red-400 hover:shadow-lg hover:shadow-red-500/50 transition-all duration-300 flex items-center justify-center gap-2"
+                  disabled={!hasSchedules}
+                  className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-4 rounded-xl font-bold text-lg hover:from-red-500 hover:to-red-400 hover:shadow-lg hover:shadow-red-500/50 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                   </svg>
-                  {isAdmin ? "View Schedules" : "Book Now"}
+                  {hasSchedules ? (isAdmin ? "View Schedules" : "Book Now") : "No Schedules Available"}
                 </button>
               </div>
             </div>
@@ -148,30 +156,82 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
                 </p>
               </div>
 
+              {/* 🔥 UPDATED: Handle both old and new format */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                {movie.schedule.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => !isAdmin && onSelectSchedule(s)}
-                    disabled={isAdmin}
-                    className={`group relative px-6 py-6 bg-gradient-to-br from-gray-800 to-gray-900 text-white rounded-xl font-medium border-2 transition-all duration-300 overflow-hidden ${
-                      isAdmin 
-                        ? "border-gray-700 cursor-default opacity-75" 
-                        : "border-gray-700 hover:border-red-500 hover:scale-105"
-                    }`}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-red-600/0 to-red-600/0 group-hover:from-red-600/10 group-hover:to-red-500/10 transition-all duration-300"></div>
-                    <div className="relative z-10">
-                      <div className="text-sm text-gray-400 mb-1">Showtime</div>
-                      <div className="text-xl font-bold">{formatFriendly(s)}</div>
-                    </div>
-                    {!isAdmin && (
-                      <svg className="absolute bottom-2 right-2 w-5 h-5 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    )}
-                  </button>
-                ))}
+                {hasSchedules ? (
+                  isNewFormat ? (
+                    // NEW FORMAT: Show schedule objects with cinema, time, etc.
+                    movieSchedules.map((schedule, index) => (
+                      <button
+                        key={schedule._id || index}
+                        onClick={() => !isAdmin && onSelectSchedule(schedule)}
+                        disabled={isAdmin}
+                        className={`group relative px-6 py-6 bg-gradient-to-br from-gray-800 to-gray-900 text-white rounded-xl font-medium border-2 transition-all duration-300 overflow-hidden ${
+                          isAdmin 
+                            ? "border-gray-700 cursor-default opacity-75" 
+                            : "border-gray-700 hover:border-red-500 hover:scale-105"
+                        }`}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-600/0 to-red-600/0 group-hover:from-red-600/10 group-hover:to-red-500/10 transition-all duration-300"></div>
+                        <div className="relative z-10">
+                          <div className="text-xs text-gray-400 mb-2 uppercase tracking-wider">
+                            🎬 {schedule.cinema}
+                          </div>
+                          <div className="text-sm text-gray-300 mb-1">
+                            {new Date(schedule.date).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </div>
+                          <div className="text-2xl font-bold text-red-400">
+                            {schedule.time}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-2">
+                            💺 {schedule.availableSeats} seats
+                          </div>
+                        </div>
+                        {!isAdmin && (
+                          <svg className="absolute bottom-2 right-2 w-5 h-5 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        )}
+                      </button>
+                    ))
+                  ) : (
+                    // OLD FORMAT: Show simple date strings
+                    movieSchedules.map((s, index) => (
+                      <button
+                        key={index}
+                        onClick={() => !isAdmin && onSelectSchedule(s)}
+                        disabled={isAdmin}
+                        className={`group relative px-6 py-6 bg-gradient-to-br from-gray-800 to-gray-900 text-white rounded-xl font-medium border-2 transition-all duration-300 overflow-hidden ${
+                          isAdmin 
+                            ? "border-gray-700 cursor-default opacity-75" 
+                            : "border-gray-700 hover:border-red-500 hover:scale-105"
+                        }`}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-600/0 to-red-600/0 group-hover:from-red-600/10 group-hover:to-red-500/10 transition-all duration-300"></div>
+                        <div className="relative z-10">
+                          <div className="text-sm text-gray-400 mb-1">Showtime</div>
+                          <div className="text-xl font-bold">{formatFriendly(s)}</div>
+                        </div>
+                        {!isAdmin && (
+                          <svg className="absolute bottom-2 right-2 w-5 h-5 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        )}
+                      </button>
+                    ))
+                  )
+                ) : (
+                  <div className="col-span-full text-center py-12">
+                    <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-gray-400 text-lg">No schedules available</p>
+                  </div>
+                )}
               </div>
 
               <div className="mt-8 text-center">
