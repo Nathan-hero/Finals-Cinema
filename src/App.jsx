@@ -3,7 +3,7 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 import Navbar from "./shared/components/Navbar.jsx";
 import Home from "./features/users/pages/Home.jsx";
 import Dashboard from "./features/users/pages/Dashboard.jsx";
-import AuthForm from "./features/users/components/AuthForm.jsx";
+import AuthForm from "./shared/components/AuthForm.jsx";
 import MovieDetails from "./features/users/pages/MovieDetails.jsx";
 import moviesData from "./shared/data/moviesData.js";
 import AdminDashboard from "./features/admin/pages/AdminDashboard";
