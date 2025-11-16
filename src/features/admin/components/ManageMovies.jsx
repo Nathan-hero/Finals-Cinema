@@ -1,8 +1,11 @@
 import React, { useState } from "react";
+import moviesData from "../../../shared/data/moviesData";
 import AddMovieModal from "./AddMovieModal";
 
 export default function ManageMovies() {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [movies, setMovies] = useState(moviesData);
+
 
   // Tracks which rows are selected
   const [selectedIndexes, setSelectedIndexes] = useState([]);
@@ -99,17 +102,20 @@ export default function ManageMovies() {
           </thead>
 
           <tbody>
-            {Array.from({ length: 3 }).map((_, i) => (
+            {movies.map((movie, i) => (
               <tr 
-                key={i}
+                key={movie._id || i} 
                 className="border-b border-neutral-800 hover:bg-neutral-800 text-center"
               >
                 <td className="px-6 py-4">{i + 1}</td>
-                <td className="px-6 py-4">—</td>
-                <td className="px-6 py-4">—</td>
-                <td className="px-6 py-4">—</td>
-                <td className="px-6 py-4">—</td>
-
+                <td className="px-6 py-4">{movie.title}</td>
+                <td className="px-6 py-4">{movie.featured ? "Yes" : "No"}</td>
+                <td className="px-6 py-4">
+                  {movie.dateAdded ? new Date(movie.dateAdded).toLocaleDateString() : "—"}
+                </td>
+                <td className="px-6 py-4">
+                  {movie.lastUpdated ? new Date(movie.lastUpdated).toLocaleDateString() : "—"}
+                </td>
                 <td className="px-6 py-4">
                   <div className="flex justify-center">
                     <input 
@@ -120,10 +126,10 @@ export default function ManageMovies() {
                     />
                   </div>
                 </td>
-
               </tr>
             ))}
           </tbody>
+
         </table>
       </div>
     </section>
