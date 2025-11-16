@@ -70,9 +70,6 @@ export default function FeaturedMovieSection({
           >
             Reserve Movie
           </button>
-          <button className="bg-gray-600/70 hover:bg-gray-500 px-5 py-2 rounded-full font-semibold transition">
-            More Details
-          </button>
         </div>
       </div>
 
