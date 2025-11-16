@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 
 export default function AddMovieModal({ isOpen, onClose }) {
+    const [bannerName, setBannerName] = useState("");
+    const [posterName, setPosterName] = useState("");
+
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-            {/* Modal Box */}
             <div className="bg-[#121212] text-white w-[1250px] max-h-[90vh] rounded-xl shadow-xl p-8 overflow-y-auto">
 
                 {/* Header */}
@@ -53,7 +55,6 @@ export default function AddMovieModal({ isOpen, onClose }) {
                                 className="w-full p-2 rounded bg-[#1a1a1a] focus:outline-none focus:border-red-500"
                             />
                         </div>
-
                     </div>
 
                     {/* ROW 2 */}
@@ -71,11 +72,17 @@ export default function AddMovieModal({ isOpen, onClose }) {
                         {/* Movie Rating */}
                         <div>
                             <label className="block mb-1 text-sm">Movie Rating</label>
-                            <input
-                                type="text"
-                                placeholder="PG-13, R, G..."
+                            <select
                                 className="w-full p-2 rounded bg-[#1a1a1a] focus:outline-none focus:border-red-500"
-                            />
+                                defaultValue=""
+                            >
+                                <option value="" disabled>Select rating</option>
+                                <option value="G">G</option>
+                                <option value="PG">PG</option>
+                                <option value="PG-13">PG-13</option>
+                                <option value="R">R</option>
+                                <option value="NC-17">NC-17</option>
+                            </select>
                         </div>
 
                         {/* Banner URL + Attach */}
@@ -85,11 +92,12 @@ export default function AddMovieModal({ isOpen, onClose }) {
                             <div className="relative">
                                 <input
                                     type="text"
+                                    value={bannerName}
                                     placeholder="15:9 aspect ratio recommended"
                                     className="w-full p-2 pr-24 rounded bg-[#1a1a1a] focus:outline-none focus:border-red-500"
+                                    readOnly
                                 />
 
-                                {/* Hidden file input */}
                                 <input
                                     id="bannerFile"
                                     type="file"
@@ -97,11 +105,12 @@ export default function AddMovieModal({ isOpen, onClose }) {
                                     className="hidden"
                                     onChange={(e) => {
                                         const file = e.target.files[0];
-                                        if (file) alert("Banner Selected: " + file.name);
+                                        if (file) {
+                                            setBannerName(file.name);
+                                        }
                                     }}
                                 />
 
-                                {/* Attach Button */}
                                 <button
                                     type="button"
                                     onClick={() => document.getElementById("bannerFile").click()}
@@ -123,11 +132,12 @@ export default function AddMovieModal({ isOpen, onClose }) {
                             <div className="relative">
                                 <input
                                     type="text"
+                                    value={posterName}
                                     placeholder="3:2 aspect ratio recommended"
                                     className="w-full p-2 pr-24 rounded bg-[#1a1a1a] focus:outline-none focus:border-red-500"
+                                    readOnly
                                 />
 
-                                {/* Hidden file input */}
                                 <input
                                     id="posterFile"
                                     type="file"
@@ -135,11 +145,12 @@ export default function AddMovieModal({ isOpen, onClose }) {
                                     className="hidden"
                                     onChange={(e) => {
                                         const file = e.target.files[0];
-                                        if (file) alert("Poster Selected: " + file.name);
+                                        if (file) {
+                                            setPosterName(file.name);
+                                        }
                                     }}
                                 />
 
-                                {/* Attach Button */}
                                 <button
                                     type="button"
                                     onClick={() => document.getElementById("posterFile").click()}
@@ -173,8 +184,7 @@ export default function AddMovieModal({ isOpen, onClose }) {
                         </div>
                     </div>
 
-
-                    {/* ROW 4 — DESCRIPTION FULL ROW */}
+                    {/* Description */}
                     <div className="grid grid-cols-3 gap-6">
                         <div className="col-span-3">
                             <label className="block mb-1 text-sm">Description</label>
