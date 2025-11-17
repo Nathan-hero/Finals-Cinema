@@ -26,22 +26,29 @@ export default function GenreMovieList({ genres, moviesData, onSelect, filter, s
     if (filter === "Featured" && genre === "Featured") {
       movies = moviesData.filter((m) => m.featured);
     } else {
-      movies = moviesData.filter((m) =>
-        (Array.isArray(m.genre)
+      // Handle both array and string genre formats from backend
+      movies = moviesData.filter((m) => {
+        const movieGenres = Array.isArray(m.genre)
           ? m.genre
-          : (m.genre || "").split(",").map((g) => g.trim())
-        ).includes(genre)
-      );
+          : (m.genre || "").split(",").map((g) => g.trim());
+        
+        return movieGenres.includes(genre);
+      });
     }
 
     // Apply search filter if there's a search query
     if (searchQuery && searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
-      movies = movies.filter((movie) =>
-        movie.title.toLowerCase().includes(query) ||
-        movie.genre.toLowerCase().includes(query) ||
-        (movie.about && movie.about.toLowerCase().includes(query))
-      );
+      movies = movies.filter((movie) => {
+        const movieGenres = Array.isArray(movie.genre) 
+          ? movie.genre.join(", ") 
+          : movie.genre;
+        
+        return movie.title.toLowerCase().includes(query) ||
+          movieGenres.toLowerCase().includes(query) ||
+          (movie.about && movie.about.toLowerCase().includes(query)) ||
+          (movie.description && movie.description.toLowerCase().includes(query));
+      });
     }
 
     return movies;
@@ -53,9 +60,14 @@ export default function GenreMovieList({ genres, moviesData, onSelect, filter, s
   if (searchQuery && searchQuery.trim() && filter === "Search") {
     const searchResults = moviesData.filter((movie) => {
       const query = searchQuery.toLowerCase().trim();
+      const movieGenres = Array.isArray(movie.genre) 
+        ? movie.genre.join(", ") 
+        : movie.genre;
+      
       return movie.title.toLowerCase().includes(query) ||
-        movie.genre.toLowerCase().includes(query) ||
-        (movie.about && movie.about.toLowerCase().includes(query));
+        movieGenres.toLowerCase().includes(query) ||
+        (movie.about && movie.about.toLowerCase().includes(query)) ||
+        (movie.description && movie.description.toLowerCase().includes(query));
     });
 
     return (

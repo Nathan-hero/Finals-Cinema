@@ -9,6 +9,7 @@ import MovieDetailsModal from "../components/MovieDetailsModal";
 import useFeaturedMovies from "../../../shared/hooks/useFeaturedMovies";
 import useGenres from "../../../shared/hooks/useGenres";
 import { moviesAPI } from "../../../utils/api";
+import { adminAPI } from "../../../utils/adminAPI";
 
 export default function Home({ searchQuery, movies: propMovies, user, isAdminView }) {
   const [selectedMovie, setSelectedMovie] = useState(null);

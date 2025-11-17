@@ -11,12 +11,43 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
 
   if (!movie) return null;
 
-  // 🔥 FIX: Support both old format (schedule) and new format (schedules)
+  // Map backend fields to frontend display
+  const movieDetails = {
+    title: movie.title,
+    genre: Array.isArray(movie.genre) ? movie.genre.join(", ") : movie.genre,
+    about: movie.about || movie.description, // Backend uses "description"
+    runtime: movie.runtime || movie.duration, // Backend uses "duration"
+    rating: movie.rating || movie.movieRating, // Backend uses "movieRating"
+    price: movie.price || 210, // Default price if not set
+    poster: movie.poster || movie.posterURL, // Backend uses "posterURL"
+    banner: movie.banner || movie.bannerURL, // Backend uses "bannerURL"
+    releaseDate: movie.releaseDate,
+    language: movie.language,
+    starring: movie.starring,
+    creators: movie.creators
+  };
+
+  // Handle both old format (schedule) and new format (schedules)
   const movieSchedules = movie.schedules || movie.schedule || [];
   const hasSchedules = movieSchedules.length > 0;
 
-  // 🔥 FIX: Check if schedules are objects (new format) or strings (old format)
+  // Check if schedules are objects (new format) or strings (old format)
   const isNewFormat = hasSchedules && typeof movieSchedules[0] === 'object' && movieSchedules[0].cinema;
+
+  // Format release date
+  const formatReleaseDate = (dateString) => {
+    if (!dateString) return "TBA";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        month: 'long', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
+    } catch {
+      return dateString;
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4 overflow-auto backdrop-blur-sm">
@@ -43,17 +74,17 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
           // STEP 1: Movie Details Only
           <>
             {/* Banner */}
-            {movie.banner && (
+            {movieDetails.banner && (
               <div className="relative w-full h-56 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent z-10"></div>
                 <img
-                  src={movie.banner}
-                  alt={`${movie.title} Banner`}
+                  src={movieDetails.banner}
+                  alt={`${movieDetails.title} Banner`}
                   className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
                   <h2 className="text-4xl font-bold mb-2 text-white drop-shadow-2xl tracking-tight">
-                    {movie.title}
+                    {movieDetails.title}
                   </h2>
                   <div className="h-1 w-20 bg-gradient-to-r from-red-600 to-red-400 rounded-full"></div>
                 </div>
@@ -67,8 +98,8 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-t from-red-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                   <img
-                    src={movie.poster}
-                    alt={movie.title}
+                    src={movieDetails.poster}
+                    alt={movieDetails.title}
                     className="w-full h-auto object-cover rounded-xl shadow-2xl border-2 border-gray-700/50 transform group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
@@ -77,9 +108,9 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
               {/* Details */}
               <div className="md:col-span-2 flex flex-col justify-between space-y-4">
                 {/* Genres */}
-                {movie.genre && (
+                {movieDetails.genre && (
                   <div className="flex flex-wrap gap-2">
-                    {movie.genre.split(",").map((g, i) => (
+                    {movieDetails.genre.split(",").map((g, i) => (
                       <span
                         key={i}
                         className="px-4 py-1.5 bg-gradient-to-r from-gray-700 to-gray-800 text-gray-200 text-sm rounded-full border border-gray-600 hover:border-red-500 transition-colors duration-300"
@@ -90,24 +121,67 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
                   </div>
                 )}
 
+                {/* Additional Info Row - Release Date, Language, Cast, Directors */}
+                <div className="space-y-2">
+                  {movieDetails.releaseDate && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-gray-400">Release Date:</span>
+                      <span className="text-white font-medium">{formatReleaseDate(movieDetails.releaseDate)}</span>
+                    </div>
+                  )}
+
+                  {movieDetails.language && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                      </svg>
+                      <span className="text-gray-400">Language:</span>
+                      <span className="text-white font-medium">{movieDetails.language}</span>
+                    </div>
+                  )}
+
+                  {movieDetails.starring && Array.isArray(movieDetails.starring) && movieDetails.starring.length > 0 && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <svg className="w-4 h-4 text-red-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <span className="text-gray-400">Cast:</span>
+                      <span className="text-white font-medium flex-1">{movieDetails.starring.join(", ")}</span>
+                    </div>
+                  )}
+
+                  {movieDetails.creators && Array.isArray(movieDetails.creators) && movieDetails.creators.length > 0 && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <svg className="w-4 h-4 text-red-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-gray-400">Directors:</span>
+                      <span className="text-white font-medium flex-1">{movieDetails.creators.join(", ")}</span>
+                    </div>
+                  )}
+                </div>
+
                 {/* About */}
-                {movie.about && (
-                  <p className="text-gray-300 leading-relaxed text-base">{movie.about}</p>
+                {movieDetails.about && (
+                  <p className="text-gray-300 leading-relaxed text-base">{movieDetails.about}</p>
                 )}
 
                 {/* Info Boxes */}
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 rounded-xl border border-gray-700/50 hover:border-red-500/50 transition-colors duration-300">
                     <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Runtime</p>
-                    <p className="text-white text-lg font-semibold">{movie.runtime} mins</p>
+                    <p className="text-white text-lg font-semibold">{movieDetails.runtime} mins</p>
                   </div>
                   <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 rounded-xl border border-gray-700/50 hover:border-red-500/50 transition-colors duration-300">
                     <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Rating</p>
-                    <p className="text-white text-lg font-semibold">{movie.rating}</p>
+                    <p className="text-white text-lg font-semibold">{movieDetails.rating}</p>
                   </div>
                   <div className="bg-gradient-to-br from-red-900 to-red-800 p-4 rounded-xl border border-red-700/50 hover:border-red-500 transition-colors duration-300">
                     <p className="text-red-200 text-xs uppercase tracking-wider mb-1">Price</p>
-                    <p className="text-white text-lg font-semibold">₱{movie.price}</p>
+                    <p className="text-white text-lg font-semibold">₱{movieDetails.price}</p>
                   </div>
                 </div>
 
@@ -152,11 +226,11 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
                   Select a Schedule
                 </h2>
                 <p className="text-gray-400">
-                  Choose your preferred showtime for <span className="text-white font-semibold">{movie.title}</span>
+                  Choose your preferred showtime for <span className="text-white font-semibold">{movieDetails.title}</span>
                 </p>
               </div>
 
-              {/* 🔥 UPDATED: Handle both old and new format */}
+              {/* Schedule Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto">
                 {hasSchedules ? (
                   isNewFormat ? (

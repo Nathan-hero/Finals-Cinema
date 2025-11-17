@@ -216,32 +216,112 @@ export default function EditMovieModal({ isOpen, onClose, movieData, onMovieUpda
               ))}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <label className="block text-lg font-semibold text-white">Showtimes <span className="text-red-500">*</span></label>
-              </div>
-              <div className="flex gap-3">
-                <input type="datetime-local" value={newSchedule} onChange={(e) => setNewSchedule(e.target.value)} className="flex-1 p-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:outline-none focus:border-red-500 transition-colors duration-300" />
-                <button type="button" onClick={addSchedule} className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-500 hover:to-red-400 transition-all duration-300 flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>Add
-                </button>
-              </div>
-              {formData.schedules.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {formData.schedules.map((schedule, index) => <ScheduleItem key={schedule} schedule={schedule} index={index} onRemove={() => removeSchedule(schedule)} />)}
-                </div>
-              ) : (
-                <div className="text-center py-8 bg-gray-800/30 rounded-xl border-2 border-dashed border-gray-700">
-                  <svg className="w-12 h-12 text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className="text-gray-500">No showtimes added yet</p>
-                </div>
-              )}
-            </div>
+{/* ---------------- SHOWTIMES SECTION (FIXED) ---------------- */}
+<div className="space-y-4">
+  <div className="flex items-center gap-3">
+    <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+    <label className="block text-lg font-semibold text-white">
+      Showtimes <span className="text-red-500">*</span>
+    </label>
+  </div>
+
+  {/* INPUTS */}
+  <div className="grid md:grid-cols-3 gap-3">
+    <input
+      type="date"
+      value={newSchedule.date || ""}
+      onChange={(e) => setNewSchedule(prev => ({ ...prev, date: e.target.value }))}
+      className="p-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:border-red-500"
+      placeholder="Date"
+    />
+
+    <input
+      type="time"
+      value={newSchedule.time || ""}
+      onChange={(e) => setNewSchedule(prev => ({ ...prev, time: e.target.value }))}
+      className="p-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:border-red-500"
+      placeholder="Time"
+    />
+
+    <select
+      value={newSchedule.cinema}
+      onChange={(e) => setNewSchedule(prev => ({ ...prev, cinema: e.target.value }))}
+      className="md:col-span-1 p-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:outline-none focus:border-red-500 transition-colors duration-300"
+    >
+      <option value="" disabled>Select Cinema</option>
+      <option value="Cinema 1">Cinema 1</option>
+      <option value="Cinema 2">Cinema 2</option>
+      <option value="Cinema 3">Cinema 3</option>
+      <option value="Cinema 4">Cinema 4</option>
+      <option value="IMAX">IMAX</option>
+      <option value="4DX">4DX</option>
+      </select>
+  </div>
+
+  {/* ADD BUTTON */}
+  <button
+    type="button"
+    onClick={() => {
+      if (!newSchedule.date || !newSchedule.time || !newSchedule.cinema) {
+        return showNotification("Complete date, time, and cinema", "error");
+      }
+
+      const scheduleObj = {
+        date: [newSchedule.date],
+        time: newSchedule.time,
+        cinema: newSchedule.cinema,
+        availableSeats: 100
+      };
+
+      setFormData(prev => ({
+        ...prev,
+        schedules: [...prev.schedules, scheduleObj]
+      }));
+
+      setNewSchedule({});
+    }}
+    className="px-6 py-3 mt-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl"
+  >
+    Add Showtime
+  </button>
+
+  {/* EXISTING SHOWTIMES */}
+  {formData.schedules.length > 0 ? (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {formData.schedules.map((sch, index) => (
+        <div
+          key={index}
+          className="p-4 bg-gray-800/50 border border-gray-700 rounded-xl"
+        >
+          <div className="text-gray-300 text-sm">Showtime {index + 1}</div>
+          <div className="text-white font-bold">{sch.date[0]}</div>
+          <div className="text-white">{sch.time}</div>
+          <div className="text-gray-400 text-sm">{sch.cinema}</div>
+
+          <button
+            type="button"
+            onClick={() =>
+              setFormData(prev => ({
+                ...prev,
+                schedules: prev.schedules.filter((_, i) => i !== index)
+              }))
+            }
+            className="mt-2 w-full py-2 bg-red-600/20 hover:bg-red-600 rounded-lg text-red-400"
+          >
+            Remove
+          </button>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className="text-center py-6 bg-gray-700/20 border border-gray-700 rounded-xl">
+      <p className="text-gray-400">No showtimes added yet</p>
+    </div>
+  )}
+</div>
+
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-300">Description <span className="text-red-500">*</span></label>

@@ -140,14 +140,14 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // 🔥 FIX: Update addSchedule function
+  // ✅ FIXED: Update addSchedule function to create proper backend-compatible schedule
   const addSchedule = () => {
     if (!newSchedule.datetime || !newSchedule.cinema) {
       showNotification("Please select date/time and cinema for the schedule", "error");
       return;
     }
 
-    // Convert datetime-local to Date object
+    // Convert datetime-local to ISO string for backend
     const scheduleDate = new Date(newSchedule.datetime);
     
     // Extract time in HH:MM format
@@ -155,19 +155,23 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     const minutes = scheduleDate.getMinutes().toString().padStart(2, '0');
     const timeString = `${hours}:${minutes}`;
 
-    // Create schedule object
+    // Create schedule object that matches backend schema
     const scheduleObj = {
-      date: scheduleDate.toISOString(),
-      time: timeString,
+      date: scheduleDate.toISOString(), // Backend expects ISO string
+      time: timeString, // Time in HH:MM format
       cinema: newSchedule.cinema,
       availableSeats: 100 // Default value
     };
 
     // Check if schedule already exists (compare date + time + cinema)
     const isDuplicate = formData.schedules.some(
-      s => s.date === scheduleObj.date && 
-           s.time === scheduleObj.time && 
-           s.cinema === scheduleObj.cinema
+      s => {
+        const existingDate = new Date(s.date).toISOString();
+        const newDate = scheduleDate.toISOString();
+        return existingDate === newDate && 
+               s.time === scheduleObj.time && 
+               s.cinema === scheduleObj.cinema;
+      }
     );
 
     if (isDuplicate) {
@@ -185,7 +189,7 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     setNewSchedule({ datetime: "", cinema: "" });
   };
 
-  // 🔥 FIX: Update removeSchedule to work with objects
+  // Remove schedule by index
   const removeSchedule = (index) => {
     setFormData(prev => ({
       ...prev,
@@ -193,7 +197,7 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     }));
   };
 
-  // 🔥 OPTIMIZED: Combined image upload handler
+  // Image upload handler
   const handleImageUpload = async (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -220,8 +224,8 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     }
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  // ✅ FIXED: Handle form submission with proper schedule format
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validation
@@ -243,33 +247,46 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
       return;
     }
 
-    // Prepare data for submission
+    // Prepare data for backend - ensure schedules are properly formatted
     const movieData = {
-      ...formData,
+      title: formData.title,
+      description: formData.description,
+      releaseDate: formData.releaseDate,
+      movieRating: formData.movieRating,
+      duration: parseInt(formData.duration), // Ensure it's a number
       genre: formData.genre.length > 0 ? formData.genre : ["General"],
+      language: formData.language || "English",
       starring: formData.starring.length > 0 ? formData.starring : ["Unknown"],
       creators: formData.creators.length > 0 ? formData.creators : ["Unknown"],
-      language: formData.language || "English",
+      posterURL: formData.posterURL,
+      bannerURL: formData.bannerURL,
+      featured: formData.featured,
+      schedules: formData.schedules.map(schedule => ({
+        date: schedule.date, // Already in ISO format
+        time: schedule.time, // Already in HH:MM format
+        cinema: schedule.cinema,
+        availableSeats: schedule.availableSeats || 100
+      }))
     };
 
-    console.log("📤 Submitting movie data:", movieData); // Debug log
+    console.log("📤 Submitting movie data:", JSON.stringify(movieData, null, 2));
 
     // Submit
-    (async () => {
-      try {
-        setLoading(true);
-        await adminAPI.addMovie(movieData);
-        showNotification("Movie added successfully!");
-        setTimeout(() => {
-          handleClose();
-          if (onMovieAdded) onMovieAdded();
-        }, 2000);
-      } catch (error) {
-        showNotification("Error adding movie: " + error.message, "error");
-      } finally {
-        setLoading(false);
-      }
-    })();
+    try {
+      setLoading(true);
+      const response = await adminAPI.addMovie(movieData);
+      console.log("✅ Movie added successfully:", response);
+      showNotification("Movie added successfully!");
+      setTimeout(() => {
+        handleClose();
+        if (onMovieAdded) onMovieAdded();
+      }, 2000);
+    } catch (error) {
+      console.error("❌ Error adding movie:", error);
+      showNotification("Error adding movie: " + (error.message || "Unknown error"), "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle close
@@ -295,7 +312,7 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     onClose();
   };
 
-  // 🔥 OPTIMIZED: Reusable Image Upload Component
+  // Reusable Image Upload Component
   const ImageUpload = ({ type, preview, uploading }) => (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-300">
@@ -452,7 +469,7 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
               </div>
             </div>
 
-            {/* Genre, Cast, Directors - 🔥 OPTIMIZED with mapping */}
+            {/* Genre, Cast, Directors */}
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 { label: "Genre", field: "genre", placeholder: "Action, Drama, Thriller" },
