@@ -9,7 +9,11 @@ export default function ManageUsers() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
 
-  // Fetch users from MongoDB
+  // Pagination
+  const itemsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Fetch users
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -35,15 +39,17 @@ export default function ManageUsers() {
     setSelectedIndexes([...selectedIndexes, index]);
   }
 
-  // Open Edit Modal
+  // Edit User
   function handleEditUser() {
     if (selectedIndexes.length !== 1) return;
-    const user = filteredUsers[selectedIndexes[0]];
+
+    const absoluteIndex = startIndex + selectedIndexes[0];
+    const user = filteredUsers[absoluteIndex];
+
     setEditingUser({ ...user });
     setShowEditModal(true);
   }
 
-  // Save Edited User
   async function handleSaveEdit() {
     if (!editingUser) return;
 
@@ -52,41 +58,52 @@ export default function ManageUsers() {
         name: editingUser.name,
         email: editingUser.email,
       });
+
       alert("User updated successfully!");
       setShowEditModal(false);
       setEditingUser(null);
       setSelectedIndexes([]);
-      fetchUsers(); // Refresh list
+      fetchUsers();
     } catch (err) {
       alert("Error updating user: " + err.message);
     }
   }
 
-  // Handle Remove Users
+  // Remove Users
   async function handleRemoveUsers() {
     if (selectedIndexes.length === 0) return;
 
-    const selectedUserIds = selectedIndexes.map(index => filteredUsers[index]._id);
+    const selectedUserIds = selectedIndexes.map(index => {
+      const absoluteIndex = startIndex + index;
+      return filteredUsers[absoluteIndex]._id;
+    });
 
-    if (!window.confirm(`Delete ${selectedIndexes.length} user(s)? This will also delete their reservations.`)) return;
+    if (!window.confirm(`Delete ${selectedUserIds.length} user(s)?`)) return;
 
     try {
       await Promise.all(selectedUserIds.map(id => adminAPI.deleteUser(id)));
       alert("Users deleted successfully!");
+
       setSelectedIndexes([]);
-      fetchUsers(); // Refresh list
+      fetchUsers();
     } catch (err) {
       alert("Error deleting users: " + err.message);
     }
   }
 
-  // Filter users by search
+  // Search
   const filteredUsers = users.filter(user =>
     user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Validation rules
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+  const atFirstPage = currentPage === 1;
+  const atLastPage = currentPage === totalPages;
+
   const isEditEnabled = selectedIndexes.length === 1;
   const isRemoveEnabled = selectedIndexes.length >= 1;
 
@@ -108,33 +125,23 @@ export default function ManageUsers() {
 
         <div className="flex flex-wrap items-center justify-between px-4">
           <div className="flex space-x-8">
-
-            {/* EDIT USER BUTTON */}
             <button
               onClick={handleEditUser}
               disabled={!isEditEnabled}
               className={`text-sm font-semibold px-4 py-1.5 rounded-full w-44 
-                ${isEditEnabled
-                  ? "bg-white text-black hover:bg-gray-200 cursor-pointer"
-                  : "bg-gray-600 text-gray-300 cursor-not-allowed"
-                }`}
+                ${isEditEnabled ? "bg-white text-black hover:bg-gray-200" : "bg-gray-600 text-gray-300 cursor-not-allowed"}`}
             >
               Edit User
             </button>
 
-            {/* REMOVE USER BUTTON */}
             <button
               onClick={handleRemoveUsers}
               disabled={!isRemoveEnabled}
               className={`text-sm font-semibold px-4 py-1.5 rounded-full w-44 
-                ${isRemoveEnabled
-                  ? "bg-red-600 text-white hover:bg-red-700 cursor-pointer"
-                  : "bg-gray-600 text-gray-300 cursor-not-allowed"
-                }`}
+                ${isRemoveEnabled ? "bg-red-600 text-white hover:bg-red-700" : "bg-gray-600 text-gray-300 cursor-not-allowed"}`}
             >
               Remove User
             </button>
-
           </div>
 
           <div className="relative w-96">
@@ -142,8 +149,12 @@ export default function ManageUsers() {
               type="text"
               placeholder="Search Users"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white text-black text-sm rounded-full pl-4 pr-9 py-2 border border-gray-300 focus:ring-2 focus:ring-red-600"
+              onChange={(e) => {
+                setCurrentPage(1); // Reset page on search
+                setSearchQuery(e.target.value);
+              }}
+              className="w-full bg-white text-black text-sm rounded-full pl-4 pr-9 py-2 border border-gray-300
+                         focus:ring-2 focus:ring-red-600"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-black">
               <svg width="18" height="18" fill="none">
@@ -168,48 +179,101 @@ export default function ManageUsers() {
             </thead>
 
             <tbody>
-              {filteredUsers.length === 0 ? (
+              {paginatedUsers.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="text-center py-8 text-gray-400">
                     {searchQuery ? "No users found" : "No users available"}
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user, i) => (
-                  <tr 
-                    key={user._id || i}
-                    className="border-b border-neutral-800 hover:bg-neutral-800 text-center"
-                  >
-                    <td className="py-4 text-white">{i + 1}</td>
-                    <td className="py-4 text-white text-left">{user.name}</td>
-                    <td className="py-4 text-gray-300 text-left">{user.email}</td>
-                    <td className="py-4 text-white">
-                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—"}
-                    </td>
-                    <td className="py-4">
-                      <div className="flex justify-center">
-                        <input
-                          type="checkbox"
-                          checked={selectedIndexes.includes(i)}
-                          onChange={() => handleSelect(i)}
-                          className="accent-red-500 w-5 h-5 cursor-pointer"
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                paginatedUsers.map((user, i) => {
+                  const absoluteIndex = startIndex + i;
+
+                  return (
+                    <tr
+                      key={user._id || absoluteIndex}
+                      className="border-b border-neutral-800 hover:bg-neutral-800 text-center"
+                    >
+                      <td className="py-4 text-white">{absoluteIndex + 1}</td>
+                      <td className="py-4 text-white text-left">{user.name}</td>
+                      <td className="py-4 text-gray-300 text-left">{user.email}</td>
+                      <td className="py-4 text-white">
+                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—"}
+                      </td>
+                      <td className="py-4">
+                        <div className="flex justify-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedIndexes.includes(i)}
+                            onChange={() => handleSelect(i)}
+                            className="accent-red-500 w-5 h-5 cursor-pointer"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        <div className="flex justify-center items-center space-x-4 mt-4 text-gray-400">
+          <button
+            onClick={() => setCurrentPage(1)}
+            disabled={atFirstPage}
+            className={atFirstPage ? "text-gray-600 cursor-not-allowed" : "hover:text-white"}
+          >
+            <svg width="25" height="25" viewBox="0 0 25 25" fill="currentColor">
+              <path d="M16.25 6.25L7.5 12.5L16.25 18.75V6.25Z"/>
+              <path d="M22.5 6.25L13.75 12.5L22.5 18.75V6.25Z"/>
+            </svg>
+          </button>
+
+          <button
+            onClick={() => !atFirstPage && setCurrentPage(currentPage - 1)}
+            disabled={atFirstPage}
+            className={atFirstPage ? "text-gray-600 cursor-not-allowed" : "hover:text-white"}
+          >
+            <svg width="25" height="25" viewBox="0 0 25 25" fill="currentColor">
+              <path d="M16.25 6.25L7.5 12.5L16.25 18.75V6.25Z"/>
+            </svg>
+          </button>
+
+          <span className="text-sm text-gray-300">
+            Page {currentPage} of {totalPages || 1}
+          </span>
+
+          <button
+            onClick={() => !atLastPage && setCurrentPage(currentPage + 1)}
+            disabled={atLastPage}
+            className={atLastPage ? "text-gray-600 cursor-not-allowed" : "hover:text-white"}
+          >
+            <svg width="25" height="25" viewBox="0 0 25 25" fill="currentColor">
+              <path d="M8.75 6.25L17.5 12.5L8.75 18.75V6.25Z"/>
+            </svg>
+          </button>
+
+          <button
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={atLastPage}
+            className={atLastPage ? "text-gray-600 cursor-not-allowed" : "hover:text-white"}
+          >
+            <svg width="25" height="25" viewBox="0 0 25 25" fill="currentColor">
+              <path d="M8.75 6.25L17.5 12.5L8.75 18.75V6.25Z"/>
+              <path d="M2.5 6.25L11.25 12.5L2.5 18.75V6.25Z"/>
+            </svg>
+          </button>
+        </div>
       </section>
 
-      {/* Edit User Modal */}
+      {/* Edit Modal */}
       {showEditModal && editingUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-neutral-900 rounded-xl p-6 w-96 space-y-4">
             <h3 className="text-2xl font-semibold text-white">Edit User</h3>
-            
+
             <div>
               <label className="block text-sm text-gray-300 mb-1">Name</label>
               <input
@@ -237,6 +301,7 @@ export default function ManageUsers() {
               >
                 Save Changes
               </button>
+
               <button
                 onClick={() => {
                   setShowEditModal(false);
