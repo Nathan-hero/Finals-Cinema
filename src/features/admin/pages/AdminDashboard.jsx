@@ -9,8 +9,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Use correct environment variable name
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_ROOT = (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(/\/$/, "");
+  const API_BASE = `${API_ROOT}/api`;
 
   useEffect(() => {
     let mounted = true;
