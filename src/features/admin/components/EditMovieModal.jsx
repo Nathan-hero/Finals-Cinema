@@ -68,7 +68,15 @@ export default function EditMovieModal({ isOpen, onClose, movieData, onMovieUpda
         creators: Array.isArray(movieData.creators) ? movieData.creators : [],
         posterURL: movieData.posterURL || "", bannerURL: movieData.bannerURL || "",
         featured: movieData.featured || false,
-        schedules: Array.isArray(movieData.schedules) ? movieData.schedules : []
+        // Normalize schedules: ensure each schedule has date as an array (date[0] is the ISO string)
+        schedules: (Array.isArray(movieData.schedules) ? movieData.schedules : []).map(s => {
+          // s may already be an object with date as string/array or other shape
+          const dateVal = s?.date ?? s; // if s is a string or has date
+          return {
+            ...s,
+            date: Array.isArray(dateVal) ? dateVal : (dateVal ? [dateVal] : [])
+          };
+        })
       });
       setBannerPreview(movieData.bannerURL || null);
       setPosterPreview(movieData.posterURL || null);
@@ -290,30 +298,31 @@ export default function EditMovieModal({ isOpen, onClose, movieData, onMovieUpda
   {/* EXISTING SHOWTIMES */}
   {formData.schedules.length > 0 ? (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {formData.schedules.map((sch, index) => (
-        <div
-          key={index}
-          className="p-4 bg-gray-800/50 border border-gray-700 rounded-xl"
-        >
-          <div className="text-gray-300 text-sm">Showtime {index + 1}</div>
-          <div className="text-white font-bold">{sch.date[0]}</div>
-          <div className="text-white">{sch.time}</div>
-          <div className="text-gray-400 text-sm">{sch.cinema}</div>
+      {formData.schedules.map((sch, index) => {
+        const dateStr = Array.isArray(sch.date) ? sch.date[0] : sch.date;
+        const formatted = dateStr ? new Date(dateStr).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '';
+        return (
+          <div key={index} className="p-4 bg-gray-800/50 border border-gray-700 rounded-xl">
+            <div className="text-gray-300 text-sm">Showtime {index + 1}</div>
+            <div className="text-white font-bold">{formatted || dateStr || 'No date'}</div>
+            <div className="text-white">{sch.time}</div>
+            <div className="text-gray-400 text-sm">{sch.cinema}</div>
 
-          <button
-            type="button"
-            onClick={() =>
-              setFormData(prev => ({
-                ...prev,
-                schedules: prev.schedules.filter((_, i) => i !== index)
-              }))
-            }
-            className="mt-2 w-full py-2 bg-red-600/20 hover:bg-red-600 rounded-lg text-red-400"
-          >
-            Remove
-          </button>
-        </div>
-      ))}
+            <button
+              type="button"
+              onClick={() =>
+                setFormData(prev => ({
+                  ...prev,
+                  schedules: prev.schedules.filter((_, i) => i !== index)
+                }))
+              }
+              className="mt-2 w-full py-2 bg-red-600/20 hover:bg-red-600 rounded-lg text-red-400"
+            >
+              Remove
+            </button>
+          </div>
+        );
+      })}
     </div>
   ) : (
     <div className="text-center py-6 bg-gray-700/20 border border-gray-700 rounded-xl">

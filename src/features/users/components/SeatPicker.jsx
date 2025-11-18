@@ -36,7 +36,7 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
 
   if (!show || !movie || !selectedSchedule) return null;
 
-  // ✅ More realistic theater size - 10 rows, 12 seats per row
+  // More realistic theater size - 10 rows, 12 seats per row
   const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
   const seatsPerRow = 12;
 

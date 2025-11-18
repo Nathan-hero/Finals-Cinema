@@ -140,7 +140,7 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // ✅ FIXED: Update addSchedule function to create proper backend-compatible schedule
+  // Update addSchedule function to create proper backend-compatible schedule
   const addSchedule = () => {
     if (!newSchedule.datetime || !newSchedule.cinema) {
       showNotification("Please select date/time and cinema for the schedule", "error");
@@ -224,7 +224,7 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     }
   };
 
-  // ✅ FIXED: Handle form submission with proper schedule format
+  // Handle form submission with proper schedule format
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -275,14 +275,14 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     try {
       setLoading(true);
       const response = await adminAPI.addMovie(movieData);
-      console.log("✅ Movie added successfully:", response);
+      console.log("Movie added successfully:", response);
       showNotification("Movie added successfully!");
       setTimeout(() => {
         handleClose();
         if (onMovieAdded) onMovieAdded();
       }, 2000);
     } catch (error) {
-      console.error("❌ Error adding movie:", error);
+      console.error("Error adding movie:", error);
       showNotification("Error adding movie: " + (error.message || "Unknown error"), "error");
     } finally {
       setLoading(false);

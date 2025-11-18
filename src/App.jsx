@@ -47,10 +47,15 @@ export default function App() {
           rating: movie.movieRating,
           price: 210,
           featured: movie.featured || false,
-          schedule: ["2025-10-10T15:00", "2025-10-10T19:00", "2025-10-11T13:30"],
+          schedules: movie.schedules || [],
+          schedule: movie.schedule || [],
           about: movie.description,
           poster: movie.posterURL,
           banner: movie.bannerURL,
+          releaseDate: movie.releaseDate,
+          language: movie.language,
+          starring: movie.starring,
+          creators: movie.creators,
         }));
 
         const fallbackByTitle = new Map(
@@ -66,6 +71,7 @@ export default function App() {
             return {
               ...fallbackMovie,
               ...backendMatch,
+              schedules: backendMatch.schedules || fallbackMovie.schedules || fallbackMovie.schedule || [],
             };
           }
           return fallbackMovie;
