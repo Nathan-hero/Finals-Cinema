@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { bookingAPI } from "../../../utils/api";
+import { formatFriendly } from "../../../utils/format";
 
 export default function SeatPicker({ show, onClose, movie, selectedSchedule, onConfirm, isAdmin }) {
   const [selectedSeats, setSelectedSeats] = useState([]);
@@ -10,21 +11,49 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [bookingDetails, setBookingDetails] = useState(null);
 
+  const scheduleIdentifier = useMemo(() => {
+    if (!selectedSchedule) return "";
+    if (typeof selectedSchedule === "string") {
+      return selectedSchedule;
+    }
+
+    const cinema = (selectedSchedule.cinema || "").trim();
+    const isoDate = selectedSchedule.date ? new Date(selectedSchedule.date).toISOString() : "";
+    const time = selectedSchedule.time || "";
+
+    return [cinema, isoDate, time].filter(Boolean).join(" | ");
+  }, [selectedSchedule]);
+
+  const scheduleDisplay = useMemo(() => {
+    if (!selectedSchedule) return "";
+    if (typeof selectedSchedule === "string") {
+      return formatFriendly(selectedSchedule);
+    }
+
+    const parts = [];
+    if (selectedSchedule.cinema) parts.push(selectedSchedule.cinema);
+    if (selectedSchedule.date) parts.push(formatFriendly(selectedSchedule.date));
+    if (selectedSchedule.time) parts.push(selectedSchedule.time);
+
+    return parts.length ? parts.join(" • ") : "";
+  }, [selectedSchedule]);
+
   // Fetch booked seats whenever movie or schedule changes
   useEffect(() => {
     setSelectedSeats([]);
     setSeatFilter("all");
     setBookedSeats([]); // Clear previous booked seats first
     
-    if (show && movie && selectedSchedule) {
+    if (show && movie && scheduleIdentifier) {
       fetchBookedSeats();
     }
-  }, [movie, selectedSchedule, show]);
+  }, [movie, show, scheduleIdentifier]);
 
   async function fetchBookedSeats() {
+    if (!scheduleIdentifier) return;
     setFetchingSeats(true);
     try {
-      const response = await bookingAPI.getBookedSeats(movie.title, selectedSchedule);
+      const response = await bookingAPI.getBookedSeats(movie.title, scheduleIdentifier);
       setBookedSeats(response.bookedSeats || []);
     } catch (error) {
       console.error("Error fetching booked seats:", error);
@@ -67,6 +96,11 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
   }
 
   async function handleConfirm() {
+    if (!scheduleIdentifier) {
+      alert("Selected schedule is invalid. Please go back and choose a schedule again.");
+      return;
+    }
+
     // Prevent admin from booking
     if (isAdmin) {
       alert("Admin accounts cannot make bookings. This is a view-only mode.");
@@ -83,7 +117,7 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
     try {
       const bookingData = {
         movieTitle: movie.title,
-        showtime: selectedSchedule,
+        showtime: scheduleIdentifier,
         seats: selectedSeats,
         totalPrice: selectedSeats.length * (movie.price || 150)
       };
@@ -93,6 +127,7 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
       // ✅ Show success modal with booking details
       setBookingDetails({
         ...bookingData,
+        showtimeDisplay: scheduleDisplay,
         bookingId: result.booking._id,
         bookingDate: new Date().toLocaleDateString('en-US', { 
           month: 'long', 
@@ -148,7 +183,7 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
                 <p className="text-xs text-gray-400 mb-1">Showtime</p>
-                <p className="text-sm font-semibold text-white">{bookingDetails.showtime}</p>
+                <p className="text-sm font-semibold text-white">{bookingDetails.showtimeDisplay || bookingDetails.showtime}</p>
               </div>
               <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
                 <p className="text-xs text-gray-400 mb-1">Booking Date</p>
@@ -241,7 +276,7 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
               <span className="text-gray-400">Movie:</span> <span className="font-semibold text-white">{movie.title}</span>
             </p>
             <p className="text-gray-300">
-              <span className="text-gray-400">Schedule:</span> <span className="font-semibold text-white">{selectedSchedule}</span>
+              <span className="text-gray-400">Schedule:</span> <span className="font-semibold text-white">{scheduleDisplay || selectedSchedule}</span>
             </p>
           </div>
         </div>

@@ -31,8 +31,43 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
   const movieSchedules = movie.schedules || movie.schedule || [];
   const hasSchedules = movieSchedules.length > 0;
 
-  // Check if schedules are objects (new format) or strings (old format)
-  const isNewFormat = hasSchedules && typeof movieSchedules[0] === 'object' && movieSchedules[0].cinema;
+  const dateFormatOptions = { month: "short", day: "numeric", year: "numeric" };
+  const timeFormatOptions = { hour: "numeric", minute: "2-digit" };
+
+  const getScheduleDisplayInfo = (schedule, index) => {
+    if (schedule && typeof schedule === "object") {
+      const dateObj = schedule.date ? new Date(schedule.date) : null;
+      return {
+        cinema: schedule.cinema || `Cinema ${index + 1}`,
+        date: dateObj
+          ? dateObj.toLocaleDateString("en-US", dateFormatOptions)
+          : "Date TBA",
+        time: schedule.time ||
+          (dateObj
+            ? dateObj.toLocaleTimeString("en-US", timeFormatOptions)
+            : "Time TBA"),
+        seats:
+          typeof schedule.availableSeats === "number"
+            ? `${schedule.availableSeats}`
+            : "100",
+        value: schedule,
+      };
+    }
+
+    const parsed = new Date(schedule);
+    const validDate = !isNaN(parsed.getTime());
+    return {
+      cinema: `Cinema ${((index % 4) + 1)}`,
+      date: validDate
+        ? parsed.toLocaleDateString("en-US", dateFormatOptions)
+        : "Date TBA",
+      time: validDate
+        ? parsed.toLocaleTimeString("en-US", timeFormatOptions)
+        : "Time TBA",
+      seats: "100",
+      value: schedule,
+    };
+  };
 
   // Format release date
   const formatReleaseDate = (dateString) => {
@@ -233,62 +268,33 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
               {/* Schedule Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto">
                 {hasSchedules ? (
-                  isNewFormat ? (
-                    // NEW FORMAT: Show schedule objects with cinema, time, etc.
-                    movieSchedules.map((schedule, index) => (
-                      <button
-                        key={schedule._id || index}
-                        onClick={() => !isAdmin && onSelectSchedule(schedule)}
-                        disabled={isAdmin}
-                        className={`group relative px-6 py-6 bg-gradient-to-br from-gray-800 to-gray-900 text-white rounded-xl font-medium border-2 transition-all duration-300 overflow-hidden ${
-                          isAdmin 
-                            ? "border-gray-700 cursor-default opacity-75" 
-                            : "border-gray-700 hover:border-red-500 hover:scale-105"
-                        }`}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-red-600/0 to-red-600/0 group-hover:from-red-600/10 group-hover:to-red-500/10 transition-all duration-300"></div>
-                        <div className="relative z-10">
-                          <div className="text-xs text-gray-400 mb-2 uppercase tracking-wider">
-                            🎬 {schedule.cinema}
-                          </div>
-                          <div className="text-sm text-gray-300 mb-1">
-                            {new Date(schedule.date).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
-                          </div>
-                          <div className="text-2xl font-bold text-red-400">
-                            {schedule.time}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-2">
-                            💺 {schedule.availableSeats} seats
-                          </div>
-                        </div>
-                        {!isAdmin && (
-                          <svg className="absolute bottom-2 right-2 w-5 h-5 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        )}
-                      </button>
-                    ))
-                  ) : (
-                    // OLD FORMAT: Show simple date strings
-                    movieSchedules.map((s, index) => (
+                  movieSchedules.map((schedule, index) => {
+                    const info = getScheduleDisplayInfo(schedule, index);
+                    return (
                       <button
                         key={index}
-                        onClick={() => !isAdmin && onSelectSchedule(s)}
+                        onClick={() => !isAdmin && onSelectSchedule(info.value)}
                         disabled={isAdmin}
                         className={`group relative px-6 py-6 bg-gradient-to-br from-gray-800 to-gray-900 text-white rounded-xl font-medium border-2 transition-all duration-300 overflow-hidden ${
-                          isAdmin 
-                            ? "border-gray-700 cursor-default opacity-75" 
+                          isAdmin
+                            ? "border-gray-700 cursor-default opacity-75"
                             : "border-gray-700 hover:border-red-500 hover:scale-105"
                         }`}
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-red-600/0 to-red-600/0 group-hover:from-red-600/10 group-hover:to-red-500/10 transition-all duration-300"></div>
-                        <div className="relative z-10">
-                          <div className="text-sm text-gray-400 mb-1">Showtime</div>
-                          <div className="text-xl font-bold">{formatFriendly(s)}</div>
+                        <div className="relative z-10 space-y-2">
+                          <div className="text-xs text-gray-400 uppercase tracking-wider">
+                            🎬 {info.cinema}
+                          </div>
+                          <div className="text-sm text-gray-300">
+                            {info.date}
+                          </div>
+                          <div className="text-2xl font-bold text-red-400">
+                            {info.time}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            💺 {info.seats} seats
+                          </div>
                         </div>
                         {!isAdmin && (
                           <svg className="absolute bottom-2 right-2 w-5 h-5 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,8 +302,8 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
                           </svg>
                         )}
                       </button>
-                    ))
-                  )
+                    );
+                  })
                 ) : (
                   <div className="col-span-full text-center py-12">
                     <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -6,6 +6,17 @@ export default function Dashboard() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cancelModal, setCancelModal] = useState({
+    open: false,
+    booking: null,
+    loading: false,
+  });
+  const [statusModal, setStatusModal] = useState({
+    open: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -37,16 +48,56 @@ export default function Dashboard() {
     }
   }
 
-  async function handleDelete(bookingId) {
-    if (!confirm("Cancel this booking?")) return;
+  function handleDelete(booking) {
+    setCancelModal({
+      open: true,
+      booking,
+      loading: false,
+    });
+  }
+
+  function closeCancelModal() {
+    setCancelModal({
+      open: false,
+      booking: null,
+      loading: false,
+    });
+  }
+
+  function showStatus(type, title, message) {
+    setStatusModal({
+      open: true,
+      type,
+      title,
+      message,
+    });
+  }
+
+  function closeStatusModal() {
+    setStatusModal((prev) => ({ ...prev, open: false }));
+  }
+
+  async function confirmCancellation() {
+    if (!cancelModal.booking) return;
 
     try {
-      await bookingAPI.deleteBooking(bookingId);
-      setBookings(bookings.filter((b) => b._id !== bookingId));
-      alert("Booking cancelled successfully!");
+      setCancelModal((prev) => ({ ...prev, loading: true }));
+      await bookingAPI.deleteBooking(cancelModal.booking._id);
+      setBookings((prev) => prev.filter((b) => b._id !== cancelModal.booking._id));
+      closeCancelModal();
+      showStatus(
+        "success",
+        "Booking Cancelled",
+        `${cancelModal.booking.movieTitle} - ${cancelModal.booking.showtime}`
+      );
     } catch (error) {
       console.error("Delete error:", error);
-      alert("Failed to cancel booking");
+      setCancelModal((prev) => ({ ...prev, loading: false }));
+      showStatus(
+        "error",
+        "Cancellation Failed",
+        error.response?.data?.message || "Failed to cancel booking. Please try again."
+      );
     }
   }
 
@@ -208,7 +259,7 @@ export default function Dashboard() {
                   </div>
 
                   <button
-                    onClick={() => handleDelete(booking._id)}
+                    onClick={() => handleDelete(booking)}
                     className="bg-red-600 hover:bg-red-700 text-white text-sm px-7 py-1.5 rounded-full tracking-wide transition-colors"
                   >
                     Cancel
@@ -220,6 +271,97 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Cancellation Confirmation Modal */}
+      {cancelModal.open && cancelModal.booking && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white rounded-2xl shadow-2xl max-w-lg w-full border border-red-700/50 overflow-hidden">
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728" />
+                </svg>
+                <div>
+                  <h3 className="text-2xl font-bold">Cancel Reservation?</h3>
+                  <p className="text-sm text-gray-400">This action cannot be undone.</p>
+                </div>
+              </div>
+
+              <div className="bg-gray-900/60 rounded-xl border border-gray-800 p-4 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Movie:</span>
+                  <span className="font-semibold text-white">{cancelModal.booking.movieTitle}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Showtime:</span>
+                  <span className="font-semibold text-white">{cancelModal.booking.showtime}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Seats:</span>
+                  <span className="font-semibold text-white">{displaySeats(cancelModal.booking.seats)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Total:</span>
+                  <span className="font-semibold text-red-400">₱{cancelModal.booking.totalPrice}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-950/70 border-t border-gray-800 px-6 py-4 flex gap-3">
+              <button
+                onClick={closeCancelModal}
+                disabled={cancelModal.loading}
+                className="flex-1 px-4 py-2 rounded-xl bg-gray-800 text-white hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Keep Booking
+              </button>
+              <button
+                onClick={confirmCancellation}
+                disabled={cancelModal.loading}
+                className="flex-1 px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {cancelModal.loading && (
+                  <span className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin"></span>
+                )}
+                Cancel Booking
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Status Modal */}
+      {statusModal.open && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white rounded-2xl shadow-2xl max-w-md w-full border border-gray-700/50 overflow-hidden">
+            <div className={`p-6 flex flex-col items-center text-center gap-4 ${statusModal.type === "success" ? "text-green-400" : "text-red-400"}`}>
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${statusModal.type === "success" ? "bg-green-500/20" : "bg-red-500/20"}`}>
+                {statusModal.type === "success" ? (
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                )}
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-2">{statusModal.title}</h3>
+                <p className="text-gray-400">{statusModal.message}</p>
+              </div>
+            </div>
+            <div className="bg-gray-950/70 border-t border-gray-800 px-6 py-4">
+              <button
+                onClick={closeStatusModal}
+                className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-gray-700 to-gray-600 text-white font-semibold hover:from-gray-600 hover:to-gray-500 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
