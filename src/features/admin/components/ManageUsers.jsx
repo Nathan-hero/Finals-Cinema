@@ -1,22 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { adminAPI } from "../../../utils/adminAPI";
+import EditUserModal from "./EditUserModal";
+import RemoveUserModal from "./RemoveUserModal";
+import EditUserStatus from "./EditUserStatus";
+import RemoveUserStatus from "./RemoveUserStatus";
 
 export default function ManageUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedIndexes, setSelectedIndexes] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // EDIT STATUS MODAL
+  const [editStatusOpen, setEditStatusOpen] = useState(false);
+  const [editStatusType, setEditStatusType] = useState("success");
+  const [editStatusMessage, setEditStatusMessage] = useState("");
+
+  // REMOVE STATUS MODAL
+  const [removeStatusOpen, setRemoveStatusOpen] = useState(false);
+  const [removeStatusType, setRemoveStatusType] = useState("success");
+  const [removeStatusMessage, setRemoveStatusMessage] = useState("");
 
   // Pagination
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch users
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  // Fetch Users
+  useEffect(() => { fetchUsers(); }, []);
 
   async function fetchUsers() {
     try {
@@ -24,19 +39,20 @@ export default function ManageUsers() {
       const data = await adminAPI.getAllUsers();
       setUsers(data);
     } catch (err) {
-      console.error("Error fetching users:", err);
-      alert("Error loading users: " + err.message);
+      setRemoveStatusType("error");
+      setRemoveStatusMessage("Error loading users: " + err.message);
+      setRemoveStatusOpen(true);
     } finally {
       setLoading(false);
     }
   }
 
   function handleSelect(index) {
-    if (selectedIndexes.includes(index)) {
-      setSelectedIndexes(selectedIndexes.filter(i => i !== index));
-      return;
-    }
-    setSelectedIndexes([...selectedIndexes, index]);
+    setSelectedIndexes((prev) =>
+      prev.includes(index)
+        ? prev.filter((i) => i !== index)
+        : [...prev, index]
+    );
   }
 
   // Edit User
@@ -59,42 +75,55 @@ export default function ManageUsers() {
         email: editingUser.email,
       });
 
-      alert("User updated successfully!");
+      setEditStatusType("success");
+      setEditStatusMessage("User updated successfully!");
+      setEditStatusOpen(true);
+
       setShowEditModal(false);
       setEditingUser(null);
       setSelectedIndexes([]);
       fetchUsers();
     } catch (err) {
-      alert("Error updating user: " + err.message);
+      setEditStatusType("error");
+      setEditStatusMessage("Error updating user: " + err.message);
+      setEditStatusOpen(true);
     }
   }
 
   // Remove Users
-  async function handleRemoveUsers() {
+  function handleRemoveUsers() {
     if (selectedIndexes.length === 0) return;
+    setShowDeleteModal(true);
+  }
 
-    const selectedUserIds = selectedIndexes.map(index => {
+  async function confirmDeleteUsers() {
+    const selectedUserIds = selectedIndexes.map((index) => {
       const absoluteIndex = startIndex + index;
       return filteredUsers[absoluteIndex]._id;
     });
 
-    if (!window.confirm(`Delete ${selectedUserIds.length} user(s)?`)) return;
-
     try {
-      await Promise.all(selectedUserIds.map(id => adminAPI.deleteUser(id)));
-      alert("Users deleted successfully!");
+      await Promise.all(selectedUserIds.map((id) => adminAPI.deleteUser(id)));
+
+      setRemoveStatusType("success");
+      setRemoveStatusMessage("Users deleted successfully!");
+      setRemoveStatusOpen(true);
 
       setSelectedIndexes([]);
+      setShowDeleteModal(false);
       fetchUsers();
     } catch (err) {
-      alert("Error deleting users: " + err.message);
+      setRemoveStatusType("error");
+      setRemoveStatusMessage("Error deleting users: " + err.message);
+      setRemoveStatusOpen(true);
     }
   }
 
   // Search
-  const filteredUsers = users.filter(user =>
-    user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Pagination Logic
@@ -129,7 +158,11 @@ export default function ManageUsers() {
               onClick={handleEditUser}
               disabled={!isEditEnabled}
               className={`text-sm font-semibold px-4 py-1.5 rounded-full w-44 
-                ${isEditEnabled ? "bg-white text-black hover:bg-gray-200" : "bg-gray-600 text-gray-300 cursor-not-allowed"}`}
+                ${
+                  isEditEnabled
+                    ? "bg-white text-black hover:bg-gray-200"
+                    : "bg-gray-600 text-gray-300 cursor-not-allowed"
+                }`}
             >
               Edit User
             </button>
@@ -138,7 +171,11 @@ export default function ManageUsers() {
               onClick={handleRemoveUsers}
               disabled={!isRemoveEnabled}
               className={`text-sm font-semibold px-4 py-1.5 rounded-full w-44 
-                ${isRemoveEnabled ? "bg-red-600 text-white hover:bg-red-700" : "bg-gray-600 text-gray-300 cursor-not-allowed"}`}
+                ${
+                  isRemoveEnabled
+                    ? "bg-red-600 text-white hover:bg-red-700"
+                    : "bg-gray-600 text-gray-300 cursor-not-allowed"
+                }`}
             >
               Remove User
             </button>
@@ -150,7 +187,7 @@ export default function ManageUsers() {
               placeholder="Search Users"
               value={searchQuery}
               onChange={(e) => {
-                setCurrentPage(1); // Reset page on search
+                setCurrentPage(1);
                 setSearchQuery(e.target.value);
               }}
               className="w-full bg-white text-black text-sm rounded-full pl-4 pr-9 py-2 border border-gray-300
@@ -158,14 +195,14 @@ export default function ManageUsers() {
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-black">
               <svg width="18" height="18" fill="none">
-                <circle cx="7" cy="7" r="5" stroke="black" strokeWidth="2"/>
-                <line x1="11" y1="11" x2="16" y2="16" stroke="black" strokeWidth="2"/>
+                <circle cx="7" cy="7" r="5" stroke="black" strokeWidth="2" />
+                <line x1="11" y1="11" x2="16" y2="16" stroke="black" strokeWidth="2" />
               </svg>
             </span>
           </div>
         </div>
 
-        {/* Users Table */}
+        {/* TABLE */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm mt-4 table-fixed">
             <thead className="border-b border-neutral-700 text-gray-300">
@@ -195,10 +232,12 @@ export default function ManageUsers() {
                       className="border-b border-neutral-800 hover:bg-neutral-800 text-center"
                     >
                       <td className="py-4 text-white">{absoluteIndex + 1}</td>
-                      <td className="py-4 text-white text-left">{user.name}</td>
-                      <td className="py-4 text-gray-300 text-left">{user.email}</td>
+                      <td className="py-4 text-left text-white">{user.name}</td>
+                      <td className="py-4 text-left text-gray-300">{user.email}</td>
                       <td className="py-4 text-white">
-                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—"}
+                        {user.createdAt
+                          ? new Date(user.createdAt).toLocaleDateString()
+                          : "—"}
                       </td>
                       <td className="py-4">
                         <div className="flex justify-center">
@@ -225,9 +264,9 @@ export default function ManageUsers() {
             disabled={atFirstPage}
             className={atFirstPage ? "text-gray-600 cursor-not-allowed" : "hover:text-white"}
           >
-            <svg width="25" height="25" viewBox="0 0 25 25" fill="currentColor">
-              <path d="M16.25 6.25L7.5 12.5L16.25 18.75V6.25Z"/>
-              <path d="M22.5 6.25L13.75 12.5L22.5 18.75V6.25Z"/>
+            <svg width="25" height="25" fill="currentColor">
+              <path d="M16.25 6.25L7.5 12.5L16.25 18.75V6.25Z" />
+              <path d="M22.5 6.25L13.75 12.5L22.5 18.75V6.25Z" />
             </svg>
           </button>
 
@@ -236,8 +275,8 @@ export default function ManageUsers() {
             disabled={atFirstPage}
             className={atFirstPage ? "text-gray-600 cursor-not-allowed" : "hover:text-white"}
           >
-            <svg width="25" height="25" viewBox="0 0 25 25" fill="currentColor">
-              <path d="M16.25 6.25L7.5 12.5L16.25 18.75V6.25Z"/>
+            <svg width="25" height="25" fill="currentColor">
+              <path d="M16.25 6.25L7.5 12.5L16.25 18.75V6.25Z" />
             </svg>
           </button>
 
@@ -250,8 +289,8 @@ export default function ManageUsers() {
             disabled={atLastPage}
             className={atLastPage ? "text-gray-600 cursor-not-allowed" : "hover:text-white"}
           >
-            <svg width="25" height="25" viewBox="0 0 25 25" fill="currentColor">
-              <path d="M8.75 6.25L17.5 12.5L8.75 18.75V6.25Z"/>
+            <svg width="25" height="25" fill="currentColor">
+              <path d="M8.75 6.25L17.5 12.5L8.75 18.75V6.25Z" />
             </svg>
           </button>
 
@@ -260,61 +299,49 @@ export default function ManageUsers() {
             disabled={atLastPage}
             className={atLastPage ? "text-gray-600 cursor-not-allowed" : "hover:text-white"}
           >
-            <svg width="25" height="25" viewBox="0 0 25 25" fill="currentColor">
-              <path d="M8.75 6.25L17.5 12.5L8.75 18.75V6.25Z"/>
-              <path d="M2.5 6.25L11.25 12.5L2.5 18.75V6.25Z"/>
+            <svg width="25" height="25" fill="currentColor">
+              <path d="M8.75 6.25L17.5 12.5L8.75 18.75V6.25Z" />
+              <path d="M2.5 6.25L11.25 12.5L2.5 18.75V6.25Z" />
             </svg>
           </button>
         </div>
       </section>
 
-      {/* Edit Modal */}
-      {showEditModal && editingUser && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-neutral-900 rounded-xl p-6 w-96 space-y-4">
-            <h3 className="text-2xl font-semibold text-white">Edit User</h3>
+      {/* Edit User Modal */}
+      <EditUserModal
+        isOpen={showEditModal}
+        editingUser={editingUser}
+        setEditingUser={setEditingUser}
+        onSave={handleSaveEdit}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingUser(null);
+        }}
+      />
 
-            <div>
-              <label className="block text-sm text-gray-300 mb-1">Name</label>
-              <input
-                type="text"
-                value={editingUser.name}
-                onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                className="w-full bg-neutral-800 text-white rounded px-3 py-2 border border-neutral-700 focus:ring-2 focus:ring-red-600"
-              />
-            </div>
+      {/* Delete Modal */}
+      <RemoveUserModal
+        isOpen={showDeleteModal}
+        count={selectedIndexes.length}
+        onConfirm={confirmDeleteUsers}
+        onClose={() => setShowDeleteModal(false)}
+      />
 
-            <div>
-              <label className="block text-sm text-gray-300 mb-1">Email</label>
-              <input
-                type="email"
-                value={editingUser.email}
-                onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                className="w-full bg-neutral-800 text-white rounded px-3 py-2 border border-neutral-700 focus:ring-2 focus:ring-red-600"
-              />
-            </div>
+      {/* EDIT USER STATUS MODAL */}
+      <EditUserStatus
+        isOpen={editStatusOpen}
+        type={editStatusType}
+        message={editStatusMessage}
+        onClose={() => setEditStatusOpen(false)}
+      />
 
-            <div className="flex space-x-4 pt-4">
-              <button
-                onClick={handleSaveEdit}
-                className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 font-semibold"
-              >
-                Save Changes
-              </button>
-
-              <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingUser(null);
-                }}
-                className="flex-1 bg-neutral-700 text-white py-2 rounded-lg hover:bg-neutral-600 font-semibold"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* REMOVE USER STATUS MODAL */}
+      <RemoveUserStatus
+        isOpen={removeStatusOpen}
+        type={removeStatusType}
+        message={removeStatusMessage}
+        onClose={() => setRemoveStatusOpen(false)}
+      />
     </>
   );
 }

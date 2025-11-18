@@ -1,65 +1,18 @@
 import React, { useState } from "react";
 import { adminAPI } from "../../../utils/adminAPI";
-
-// Success Modal Component
-function SuccessModal({ isOpen, onClose, message, type = "success" }) {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[60] backdrop-blur-sm animate-fade-in">
-      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden border border-gray-700/50 animate-scale-in">
-        <div className="p-8 text-center">
-          <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 ${
-            type === "success" ? "bg-green-500/20 animate-bounce" : "bg-red-500/20"
-          }`}>
-            <svg className={`w-10 h-10 ${type === "success" ? "text-green-500" : "text-red-500"}`} 
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                    d={type === "success" ? "M5 13l4 4L19 7" : "M6 18L18 6M6 6l12 12"} />
-            </svg>
-          </div>
-          
-          <h3 className="text-2xl font-bold mb-2">
-            {type === "success" ? "Success!" : "Error"}
-          </h3>
-          <p className="text-gray-300 mb-6">{message}</p>
-          
-          <button
-            onClick={onClose}
-            className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-3 rounded-xl font-bold hover:from-red-500 hover:to-red-400 transition-all duration-300"
-          >
-            Close
-          </button>
-        </div>
-        
-        <div className="h-2 bg-gradient-to-r from-red-600 via-red-500 to-red-600"></div>
-      </div>
-
-      <style>{`
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 0.2s ease-out;
-        }
-      `}</style>
-    </div>
-  );
-}
+import AddMovieStatus from "./AddMovieStatus"; // NEW IMPORT
 
 // Updated Schedule Item Component
 function ScheduleItemUpdated({ schedule, onRemove, index }) {
   const formatDateTime = (isoDate) => {
     const date = new Date(isoDate);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -67,9 +20,7 @@ function ScheduleItemUpdated({ schedule, onRemove, index }) {
     <div className="group relative px-4 py-4 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border-2 border-gray-700 hover:border-red-500 transition-all duration-300">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <div className="text-sm text-gray-400 mb-1">
-            🎬 {schedule.cinema}
-          </div>
+          <div className="text-sm text-gray-400 mb-1">🎬 {schedule.cinema}</div>
           <div className="text-lg font-bold text-white">
             {formatDateTime(schedule.date)}
           </div>
@@ -82,8 +33,18 @@ function ScheduleItemUpdated({ schedule, onRemove, index }) {
           onClick={onRemove}
           className="w-8 h-8 flex items-center justify-center bg-red-600/20 hover:bg-red-600 rounded-full transition-all duration-300"
         >
-          <svg className="w-4 h-4 text-red-500 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-4 h-4 text-red-500 hover:text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -95,8 +56,8 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
   const [loading, setLoading] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [uploadingPoster, setUploadingPoster] = useState(false);
-  
-  // Success/Error modal state
+
+  // NEW — Uses AddMovieStatus.jsx
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalType, setModalType] = useState("success");
@@ -114,12 +75,12 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     posterURL: "",
     bannerURL: "",
     featured: false,
-    schedules: [], // Will store objects now
+    schedules: [],
   });
 
   const [newSchedule, setNewSchedule] = useState({
     datetime: "",
-    cinema: ""
+    cinema: "",
   });
 
   const [bannerPreview, setBannerPreview] = useState(null);
@@ -127,118 +88,118 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
 
   if (!isOpen) return null;
 
-  // Show success/error modal
   const showNotification = (message, type = "success") => {
     setModalMessage(message);
     setModalType(type);
     setShowModal(true);
   };
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Update addSchedule function to create proper backend-compatible schedule
   const addSchedule = () => {
     if (!newSchedule.datetime || !newSchedule.cinema) {
-      showNotification("Please select date/time and cinema for the schedule", "error");
+      showNotification(
+        "Please select date/time and cinema for the schedule",
+        "error"
+      );
       return;
     }
 
-    // Convert datetime-local to ISO string for backend
     const scheduleDate = new Date(newSchedule.datetime);
-    
-    // Extract time in HH:MM format
-    const hours = scheduleDate.getHours().toString().padStart(2, '0');
-    const minutes = scheduleDate.getMinutes().toString().padStart(2, '0');
+
+    const hours = scheduleDate.getHours().toString().padStart(2, "0");
+    const minutes = scheduleDate.getMinutes().toString().padStart(2, "0");
     const timeString = `${hours}:${minutes}`;
 
-    // Create schedule object that matches backend schema
     const scheduleObj = {
-      date: scheduleDate.toISOString(), // Backend expects ISO string
-      time: timeString, // Time in HH:MM format
+      date: scheduleDate.toISOString(),
+      time: timeString,
       cinema: newSchedule.cinema,
-      availableSeats: 100 // Default value
+      availableSeats: 100,
     };
 
-    // Check if schedule already exists (compare date + time + cinema)
-    const isDuplicate = formData.schedules.some(
-      s => {
-        const existingDate = new Date(s.date).toISOString();
-        const newDate = scheduleDate.toISOString();
-        return existingDate === newDate && 
-               s.time === scheduleObj.time && 
-               s.cinema === scheduleObj.cinema;
-      }
-    );
+    const isDuplicate = formData.schedules.some((s) => {
+      const existingDate = new Date(s.date).toISOString();
+      const newDate = scheduleDate.toISOString();
+      return (
+        existingDate === newDate &&
+        s.time === scheduleObj.time &&
+        s.cinema === scheduleObj.cinema
+      );
+    });
 
     if (isDuplicate) {
       showNotification("This schedule already exists", "error");
       return;
     }
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      schedules: [...prev.schedules, scheduleObj].sort((a, b) => 
-        new Date(a.date) - new Date(b.date)
-      )
+      schedules: [...prev.schedules, scheduleObj].sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      ),
     }));
-    
+
     setNewSchedule({ datetime: "", cinema: "" });
   };
 
-  // Remove schedule by index
   const removeSchedule = (index) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      schedules: prev.schedules.filter((_, i) => i !== index)
+      schedules: prev.schedules.filter((_, i) => i !== index),
     }));
   };
 
-  // Image upload handler
   const handleImageUpload = async (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const setUploading = type === "banner" ? setUploadingBanner : setUploadingPoster;
-    const setPreview = type === "banner" ? setBannerPreview : setPosterPreview;
+    const setUploading =
+      type === "banner" ? setUploadingBanner : setUploadingPoster;
+    const setPreview =
+      type === "banner" ? setBannerPreview : setPosterPreview;
     const urlField = type === "banner" ? "bannerURL" : "posterURL";
 
-    // Show preview
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result);
     reader.readAsDataURL(file);
 
-    // Upload to Cloudinary
     try {
       setUploading(true);
       const url = await adminAPI.uploadImage(file, `movies/${type}s`);
-      setFormData(prev => ({ ...prev, [urlField]: url }));
-      showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} uploaded successfully!`);
+      setFormData((prev) => ({ ...prev, [urlField]: url }));
+      showNotification(
+        `${type.charAt(0).toUpperCase() + type.slice(1)} uploaded successfully!`
+      );
     } catch (error) {
-      showNotification(`Error uploading ${type}: ${error.message}`, "error");
+      showNotification(
+        `Error uploading ${type}: ${error.message}`,
+        "error"
+      );
     } finally {
       setUploading(false);
     }
   };
 
-  // Handle form submission with proper schedule format
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
     if (
-        !formData.title || 
-        !formData.description || 
-        !formData.releaseDate ||
-        !formData.movieRating ||
-        !formData.duration ||
-        !formData.posterURL || 
-        !formData.bannerURL
+      !formData.title ||
+      !formData.description ||
+      !formData.releaseDate ||
+      !formData.movieRating ||
+      !formData.duration ||
+      !formData.posterURL ||
+      !formData.bannerURL
     ) {
-      showNotification("Please fill in all basic required fields and upload images", "error");
+      showNotification(
+        "Please fill in all required fields and upload images",
+        "error"
+      );
       return;
     }
 
@@ -247,13 +208,12 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
       return;
     }
 
-    // Prepare data for backend - ensure schedules are properly formatted
     const movieData = {
       title: formData.title,
       description: formData.description,
       releaseDate: formData.releaseDate,
       movieRating: formData.movieRating,
-      duration: parseInt(formData.duration), // Ensure it's a number
+      duration: parseInt(formData.duration),
       genre: formData.genre.length > 0 ? formData.genre : ["General"],
       language: formData.language || "English",
       starring: formData.starring.length > 0 ? formData.starring : ["Unknown"],
@@ -261,35 +221,28 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
       posterURL: formData.posterURL,
       bannerURL: formData.bannerURL,
       featured: formData.featured,
-      schedules: formData.schedules.map(schedule => ({
-        date: schedule.date, // Already in ISO format
-        time: schedule.time, // Already in HH:MM format
-        cinema: schedule.cinema,
-        availableSeats: schedule.availableSeats || 100
-      }))
+      schedules: formData.schedules,
     };
 
-    console.log("📤 Submitting movie data:", JSON.stringify(movieData, null, 2));
-
-    // Submit
     try {
       setLoading(true);
-      const response = await adminAPI.addMovie(movieData);
-      console.log("Movie added successfully:", response);
-      showNotification("Movie added successfully!");
+      await adminAPI.addMovie(movieData);
+      showNotification("Movie added successfully!", "success");
+
       setTimeout(() => {
         handleClose();
         if (onMovieAdded) onMovieAdded();
       }, 2000);
     } catch (error) {
-      console.error("Error adding movie:", error);
-      showNotification("Error adding movie: " + (error.message || "Unknown error"), "error");
+      showNotification(
+        "Error adding movie: " + (error.message || "Unknown error"),
+        "error"
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle close
   const handleClose = () => {
     setFormData({
       title: "",
@@ -306,18 +259,20 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
       featured: false,
       schedules: [],
     });
+
     setBannerPreview(null);
     setPosterPreview(null);
     setNewSchedule({ datetime: "", cinema: "" });
     onClose();
   };
 
-  // Reusable Image Upload Component
   const ImageUpload = ({ type, preview, uploading }) => (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-300">
-        {type.charAt(0).toUpperCase() + type.slice(1)} Image <span className="text-red-500">*</span>
+        {type.charAt(0).toUpperCase() + type.slice(1)} Image{" "}
+        <span className="text-red-500">*</span>
       </label>
+
       <div className="relative group">
         <input
           id={`${type}File`}
@@ -333,14 +288,31 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
           className="w-full h-40 border-2 border-dashed border-gray-700 hover:border-red-500 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 bg-gray-800/50 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {preview ? (
-            <img src={preview} alt={`${type} preview`} className="w-full h-full object-cover rounded-xl" />
+            <img
+              src={preview}
+              alt={`${type} preview`}
+              className="w-full h-full object-cover rounded-xl"
+            />
           ) : (
             <>
-              <svg className="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <svg
+                className="w-12 h-12 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
               </svg>
               <span className="text-sm text-gray-400">
-                {uploading ? "Uploading..." : `Click to upload ${type} (${type === "banner" ? "16:9" : "2:3"})`}
+                {uploading
+                  ? "Uploading..."
+                  : `Click to upload ${type} (${type === "banner" ? "16:9" : "2:3"
+                  })`}
               </span>
             </>
           )}
@@ -353,8 +325,6 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     <>
       <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4 overflow-auto backdrop-blur-sm">
         <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white rounded-2xl shadow-2xl max-w-6xl w-full overflow-hidden border border-gray-700/50 animate-scale-in">
-          
-          {/* Close Button */}
           <button
             onClick={handleClose}
             className="absolute top-4 right-4 z-30 w-10 h-10 flex items-center justify-center bg-black/60 hover:bg-red-600 rounded-full transition-all duration-300 backdrop-blur-sm group"
@@ -365,31 +335,41 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
 
-          {/* Header */}
           <div className="p-8 pb-4">
             <h2 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <svg
+                className="w-10 h-10 text-red-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
               Add New Movie
             </h2>
             <div className="h-1 w-24 bg-gradient-to-r from-red-600 to-red-400 rounded-full"></div>
           </div>
 
-          {/* Form */}
           <div className="p-8 pt-4 space-y-6 max-h-[70vh] overflow-y-auto">
-            
-            {/* Image Uploads */}
             <div className="grid md:grid-cols-2 gap-6">
               <ImageUpload type="banner" preview={bannerPreview} uploading={uploadingBanner} />
               <ImageUpload type="poster" preview={posterPreview} uploading={uploadingPoster} />
             </div>
 
-            {/* Basic Info */}
             <div className="grid md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300">
@@ -434,7 +414,6 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
               </div>
             </div>
 
-            {/* Rating and Language */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300">
@@ -447,7 +426,9 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
                   className="w-full p-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:outline-none focus:border-red-500 transition-colors duration-300"
                   required
                 >
-                  <option value="" disabled>Select rating</option>
+                  <option value="" disabled>
+                    Select rating
+                  </option>
                   <option value="G">G - General Audiences</option>
                   <option value="PG">PG - Parental Guidance</option>
                   <option value="PG-13">PG-13 - Parents Strongly Cautioned</option>
@@ -469,55 +450,80 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
               </div>
             </div>
 
-            {/* Genre, Cast, Directors */}
             <div className="grid md:grid-cols-3 gap-6">
               {[
-                { label: "Genre", field: "genre", placeholder: "Action, Drama, Thriller" },
+                { label: "Genre", field: "genre", placeholder: "Action, Drama" },
                 { label: "Starring", field: "starring", placeholder: "Actor 1, Actor 2" },
-                { label: "Directors", field: "creators", placeholder: "Director 1, Director 2" }
+                { label: "Directors", field: "creators", placeholder: "Director 1, Director 2" },
               ].map(({ label, field, placeholder }) => (
                 <div key={field} className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-300">{label} (comma-separated)</label>
+                  <label className="block text-sm font-medium text-gray-300">
+                    {label} (comma-separated)
+                  </label>
                   <input
                     type="text"
                     placeholder={placeholder}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      [field]: e.target.value.split(",").map(s => s.trim()).filter(Boolean)
-                    }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        [field]: e.target.value
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean),
+                      }))
+                    }
                     className="w-full p-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:outline-none focus:border-red-500 transition-colors duration-300"
                   />
                 </div>
               ))}
             </div>
 
-            {/* Schedules Section */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <svg
+                  className="w-6 h-6 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
                 </svg>
                 <label className="block text-lg font-semibold text-white">
                   Showtimes <span className="text-red-500">*</span>
                 </label>
               </div>
-              
-              {/* Add Schedule */}
+
               <div className="grid md:grid-cols-3 gap-3">
                 <input
                   type="datetime-local"
                   value={newSchedule.datetime}
-                  onChange={(e) => setNewSchedule(prev => ({ ...prev, datetime: e.target.value }))}
+                  onChange={(e) =>
+                    setNewSchedule((prev) => ({
+                      ...prev,
+                      datetime: e.target.value,
+                    }))
+                  }
                   className="md:col-span-1 p-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:outline-none focus:border-red-500 transition-colors duration-300"
-                  placeholder="Select date & time"
                 />
-                
+
                 <select
                   value={newSchedule.cinema}
-                  onChange={(e) => setNewSchedule(prev => ({ ...prev, cinema: e.target.value }))}
+                  onChange={(e) =>
+                    setNewSchedule((prev) => ({
+                      ...prev,
+                      cinema: e.target.value,
+                    }))
+                  }
                   className="md:col-span-1 p-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:outline-none focus:border-red-500 transition-colors duration-300"
                 >
-                  <option value="" disabled>Select Cinema</option>
+                  <option value="" disabled>
+                    Select Cinema
+                  </option>
                   <option value="Cinema 1">Cinema 1</option>
                   <option value="Cinema 2">Cinema 2</option>
                   <option value="Cinema 3">Cinema 3</option>
@@ -525,20 +531,29 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
                   <option value="IMAX">IMAX</option>
                   <option value="4DX">4DX</option>
                 </select>
-                
+
                 <button
                   type="button"
                   onClick={addSchedule}
                   className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-500 hover:to-red-400 transition-all duration-300 flex items-center justify-center gap-2"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
                   </svg>
                   Add
                 </button>
               </div>
 
-              {/* Schedule List */}
               {formData.schedules.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {formData.schedules.map((schedule, index) => (
@@ -552,15 +567,24 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
                 </div>
               ) : (
                 <div className="text-center py-8 bg-gray-800/30 rounded-xl border-2 border-dashed border-gray-700">
-                  <svg className="w-12 h-12 text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-12 h-12 text-gray-600 mx-auto mb-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   <p className="text-gray-500">No showtimes added yet</p>
                 </div>
               )}
             </div>
 
-            {/* Description */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-300">
                 Description <span className="text-red-500">*</span>
@@ -575,7 +599,6 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
               ></textarea>
             </div>
 
-            {/* Buttons */}
             <div className="flex justify-end gap-4 pt-4">
               <button
                 type="button"
@@ -594,16 +617,41 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
               >
                 {loading ? (
                   <>
-                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Adding Movie...
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                     Add Movie
                   </>
@@ -612,35 +660,24 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
             </div>
           </div>
 
-          {/* Bottom Bar */}
           <div className="h-2 bg-gradient-to-r from-red-600 via-red-500 to-red-600"></div>
         </div>
       </div>
 
-      {/* Success/Error Modal */}
-      <SuccessModal
+      {/* Replaced SuccessModal with AddMovieStatus */}
+      <AddMovieStatus
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         message={modalMessage}
         type={modalType}
       />
 
-      {/* Add CSS animations */}
       <style>{`
         @keyframes scale-in {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
         }
-        
-        .animate-scale-in {
-          animation: scale-in 0.3s ease-out;
-        }
+        .animate-scale-in { animation: scale-in 0.3s ease-out; }
       `}</style>
     </>
   );
