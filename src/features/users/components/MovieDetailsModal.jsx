@@ -20,7 +20,7 @@ export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, is
     about: movie.about || movie.description, // Backend uses "description"
     runtime: movie.runtime || movie.duration, // Backend uses "duration"
     rating: movie.rating || movie.movieRating, // Backend uses "movieRating"
-    price: movie.price || 210, // Default price if not set
+    price: movie.price ?? movie.ticketPrice ?? movie.moviePrice ?? 210, // Backend uses "price"
     poster: movie.poster || movie.posterURL, // Backend uses "posterURL"
     banner: movie.banner || movie.bannerURL, // Backend uses "bannerURL"
     releaseDate: movie.releaseDate,

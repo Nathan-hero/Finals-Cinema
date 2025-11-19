@@ -56,7 +56,7 @@ export default function Home({ searchQuery, movies: propMovies, user, isAdminVie
           genre: Array.isArray(movie.genre) ? movie.genre.join(", ") : movie.genre,
           runtime: movie.duration,
           rating: movie.movieRating,
-          price: 210, // Default price, you can add this to backend if needed
+          price: movie.price ?? movie.ticketPrice ?? movie.moviePrice ?? 210, // 2
           featured: movie.featured || false,
           schedule: ["2025-10-10T15:00", "2025-10-10T19:00", "2025-10-11T13:30"], // Default schedule, you can add this to backend if needed
           about: movie.description,

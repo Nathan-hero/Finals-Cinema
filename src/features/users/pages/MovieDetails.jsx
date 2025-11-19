@@ -35,7 +35,7 @@ export default function MovieDetails() {
           genre: Array.isArray(backendMovie.genre) ? backendMovie.genre.join(", ") : backendMovie.genre,
           runtime: backendMovie.duration,
           rating: backendMovie.movieRating,
-          price: 210, // Default price
+          price: movie.price ?? movie.ticketPrice ?? movie.moviePrice ?? 210, // 3
           featured: backendMovie.featured || false,
           schedule: ["2025-10-10T15:00", "2025-10-10T19:00", "2025-10-11T13:30"], // Default schedule
           about: backendMovie.description,

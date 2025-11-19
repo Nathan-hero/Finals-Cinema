@@ -74,6 +74,7 @@ export default function EditMovieModal({
     posterURL: "",
     bannerURL: "",
     featured: false,
+    price: "",
     schedules: [],
   });
 
@@ -110,6 +111,7 @@ export default function EditMovieModal({
         posterURL: movieData.posterURL || "",
         bannerURL: movieData.bannerURL || "",
         featured: movieData.featured || false,
+        price: movieData.price || "",
         schedules: Array.isArray(movieData.schedules)
           ? movieData.schedules.map((s) => ({
               ...s,
@@ -418,12 +420,25 @@ export default function EditMovieModal({
                   ))}
                 </select>
               </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-300">
+                  Ticket Price (₱)
+                </label>
 
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  placeholder="e.g. 250"
+                  className="w-full p-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:outline-none focus:border-red-500"
+                  required
+                />
+              </div>
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300">
                   Language
                 </label>
-
                 <input
                   type="text"
                   name="language"

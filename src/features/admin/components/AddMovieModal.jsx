@@ -113,6 +113,7 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     posterURL: "",
     bannerURL: "",
     featured: false,
+    price: "",
     schedules: [], // Will store objects now
   });
 
@@ -286,6 +287,7 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
       posterURL: "",
       bannerURL: "",
       featured: false,
+      price: "",
       schedules: [],
     });
     setBannerPreview(null);
@@ -414,7 +416,21 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
                   required
                 />
               </div>
-
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-300">
+                  Ticket Price (₱) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  placeholder="e.g. 250"
+                  className="w-full p-3 rounded-xl bg-gray-800/50 border border-gray-700 
+                  focus:outline-none focus:border-red-500 transition-colors duration-300"
+                  required
+                />
+              </div>
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300">
                   Duration (mins) <span className="text-red-500">*</span>
