@@ -1,4 +1,6 @@
 import React from "react";
+// Admin only access
+// Summary of file: Modal component to show status of editing a USER Success or Error
 
 export default function EditUserStatus({ isOpen, onClose, type = "success", message }) {
   if (!isOpen) return null;

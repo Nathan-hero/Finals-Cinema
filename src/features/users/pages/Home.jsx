@@ -10,6 +10,8 @@ import useFeaturedMovies from "../../../shared/hooks/useFeaturedMovies";
 import useGenres from "../../../shared/hooks/useGenres";
 import { moviesAPI } from "../../../utils/api";
 import { adminAPI } from "../../../utils/adminAPI";
+// User access and Admin access
+// Summary of file: This component is the main home page for users, displaying featured movies, filter options, and movie listings with details and seat booking functionality.
 
 export default function Home({ searchQuery, movies: propMovies, user, isAdminView }) {
   const [selectedMovie, setSelectedMovie] = useState(null);

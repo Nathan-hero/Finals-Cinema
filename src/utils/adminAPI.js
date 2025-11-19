@@ -1,4 +1,5 @@
 // src/utils/adminAPI.js
+// Summary of file: This module provides functions to interact with the admin API, including movie management, user management, reservation handling, and statistics retrieval.
 
 const API_ROOT = (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(/\/$/, "");
 const API_BASE_URL = `${API_ROOT}/api`;

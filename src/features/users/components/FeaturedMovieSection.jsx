@@ -1,5 +1,7 @@
 // src/components/FeaturedMovieSection.jsx
 import React from "react";
+// User access (Admin can see this section as well but it is intended for users to use)
+// Summary of file: This component displays a featured movie section with navigation and reservation options.
 
 export default function FeaturedMovieSection({
   featured,

@@ -1,4 +1,6 @@
 import React from "react";
+// Admin only access
+// Summary of file: Modal component to show status of editing a RESERVATION Success or Error
 
 export default function EditReservationStatus({
   isOpen,

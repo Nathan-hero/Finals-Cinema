@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Search, User } from "lucide-react";
+// User access and Admin access
+// Summary of file: This component renders the navigation bar with logo, search functionality, and navigation links based on user role.
 
 export default function Navbar({ user, onLogout, onSearch, moviesData }) {
   const [query, setQuery] = useState("");

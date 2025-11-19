@@ -1,5 +1,5 @@
 import React from "react";
-
+// Summary of file: This component renders the footer section of the website.
 export default function Footer() {
   return (
 

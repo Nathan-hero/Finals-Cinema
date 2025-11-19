@@ -1,4 +1,5 @@
 // src/hooks/useFeaturedMovies.js
+// Summary of file: This custom hook manages the state and logic for featured movies, including transitions and auto-rotation.
 import { useState, useEffect } from "react";
 
 export default function useFeaturedMovies(moviesData) {

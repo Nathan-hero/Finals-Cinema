@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { adminAPI } from "../../../utils/adminAPI";
 import { EditConfirmModal, EditStatusModal } from "./EditMovieStatus";
+// Admin only access
+// Summary of file: Modal component for editing movie details in admin dashboard
 
 function ScheduleItem({ schedule, onRemove, index }) {
   const formatDateTime = (datetime) =>

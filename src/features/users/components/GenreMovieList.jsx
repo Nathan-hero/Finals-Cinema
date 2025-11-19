@@ -1,5 +1,7 @@
 import React from "react";
 import MovieCard from "./MovieCard";
+// User access (Admin can see this section as well)
+// Summary of file: This component displays a list of movies categorized by genre, with filtering and search capabilities.
 
 export default function GenreMovieList({ genres, moviesData, onSelect, filter, selectedGenre, searchQuery }) {
   const scroll = (id, offset) =>

@@ -1,4 +1,6 @@
 import React from "react";
+// admin only access
+// Summary of file: This component displays a modal to confirm the removal of one or more users.
 
 export default function RemoveUserModal({ isOpen, count, onConfirm, onClose }) {
   if (!isOpen) return null;

@@ -1,4 +1,6 @@
 import React from "react";
+// Admin only access
+// Summary of file: Modal component to show status of adding a movie Success or Error
 
 export default function AddMovieStatus({ isOpen, onClose, message, type = "success" }) {
   if (!isOpen) return null;

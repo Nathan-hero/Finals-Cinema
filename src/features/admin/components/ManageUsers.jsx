@@ -4,6 +4,8 @@ import EditUserModal from "./EditUserModal";
 import RemoveUserModal from "./RemoveUserModal";
 import EditUserStatus from "./EditUserStatus";
 import RemoveUserStatus from "./RemoveUserStatus";
+// admin only access
+// Summary of file: This component allows admin users to manage registered users.
 
 export default function ManageUsers() {
   const [users, setUsers] = useState([]);

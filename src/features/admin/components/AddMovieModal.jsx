@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { adminAPI } from "../../../utils/adminAPI";
 import AddMovieStatus from "./AddMovieStatus"; // NEW IMPORT
+// Admin only access
+// Summary of file: Add movie modal component located in admin dashboard
 
 // Updated Schedule Item Component
 function ScheduleItemUpdated({ schedule, onRemove, index }) {

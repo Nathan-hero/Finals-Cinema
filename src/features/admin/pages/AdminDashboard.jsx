@@ -3,6 +3,8 @@ import StatCard from "../components/StatCard";
 import ManageMovies from "../components/ManageMovies";
 import ManageUsers from "../components/ManageUsers";
 import ManageReservations from "../components/ManageReservations";
+// admin only access
+// Summary of file: This component is the main admin dashboard that displays statistics and management sections for movies, users, and reservations.
 
 export default function AdminDashboard() {
   const [counts, setCounts] = useState({ movies: 0, users: 0, reservations: 0 });

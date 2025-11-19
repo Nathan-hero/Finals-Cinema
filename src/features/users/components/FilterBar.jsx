@@ -1,6 +1,7 @@
 // src/components/FilterBar.jsx
 import React from "react";
-
+// User access (Admin can use this section as well)
+// Summary of file: This component provides a filter bar for users to filter movies by category or genre.
 export default function FilterBar({
   filter,
   setFilter,

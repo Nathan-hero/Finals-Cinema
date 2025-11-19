@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { bookingAPI } from "../../../utils/api";
+// User access (Admin cannot access this section because they have their own dashboard)
+// Summary of file: This component displays the user dashboard with their movie reservations, allowing cancellations.
 
 export default function Dashboard() {
   const [bookings, setBookings] = useState([]);

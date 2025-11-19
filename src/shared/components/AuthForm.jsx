@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import API from "../../utils/api";
+// Summary of file: This component provides an authentication form for user login and registration, including validation and error handling.
 
 export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, setShowLogoutConfirm }) {
   const [isLogin, setIsLogin] = useState(true);

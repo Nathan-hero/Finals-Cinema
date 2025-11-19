@@ -1,4 +1,6 @@
 import React from "react";
+// admin only access
+// Summary of file: This component displays a status modal indicating the success or failure of a user removal operation.
 
 export default function RemoveUserStatus({ isOpen, onClose, type = "success", message }) {
   if (!isOpen) return null;

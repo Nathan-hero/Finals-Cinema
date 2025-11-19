@@ -1,4 +1,6 @@
 import React from "react";
+// admin only access
+// Summary of file: This component displays a statistical card showing counts of movies, users, or reservations.
 
 export default function StatCard({ type, count, label }) {
   const icons = {

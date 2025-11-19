@@ -1,4 +1,5 @@
 // src/hooks/useLocalStorage.js
+// Summary of file: This custom hook manages state synchronized with localStorage, allowing persistent storage of values across sessions.
 import { useState, useEffect } from "react";
 
 export default function useLocalStorage(key, initialValue) {

@@ -4,6 +4,8 @@ import { adminAPI } from "../../../utils/adminAPI";
 import EditReservationModal from "./EditReservationModal";
 import EditReservationStatus from "./EditReservationStatus"; // USED NOW
 import RemoveReservationModal from "./RemoveReservationModal";
+// admin only access
+// Summary of file: This component allows admin users to manage movie reservations.
 
 export default function ManageReservations() {
   const [reservations, setReservations] = useState([]);

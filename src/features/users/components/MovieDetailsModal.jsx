@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { formatFriendly } from "../../../utils/format";
+// User access (Admin can see this section as well)
+// Summary of file: This component displays a modal with detailed information about a selected movie, including schedules for booking.
 
 export default function MovieDetailsModal({ movie, onClose, onSelectSchedule, isAdmin }) {
   const [showSchedules, setShowSchedules] = useState(false);

@@ -1,5 +1,7 @@
 // RemoveMovieModal.jsx
 import React from "react";
+// admin only access
+// Summary of file: This component displays a modal to confirm the removal of one or more movies.
 
 export default function RemoveMovieModal({
   isOpen,

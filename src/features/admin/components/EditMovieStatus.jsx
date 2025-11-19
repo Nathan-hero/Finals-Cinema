@@ -1,5 +1,8 @@
 // EditMovieStatus.jsx
 import React from "react";
+// Admin only access
+// Summary of file: Modal components to show confirmation and status of editing a movie
+
 
 export function EditConfirmModal({ isOpen, onClose, onConfirm }) {
   if (!isOpen) return null;

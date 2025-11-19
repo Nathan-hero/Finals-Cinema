@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { bookingAPI } from "../../../utils/api";
 import { formatFriendly } from "../../../utils/format";
+// User access (Admin can see this section as well but booking is cannot use it)
+// Summary of file: This component provides a seat picker modal for users to select and book seats for a movie showtime.
 
 export default function SeatPicker({ show, onClose, movie, selectedSchedule, onConfirm, isAdmin }) {
   const [selectedSeats, setSelectedSeats] = useState([]);

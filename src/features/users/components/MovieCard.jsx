@@ -1,4 +1,6 @@
 import React from "react";
+// User access (Admin can see this section as well)
+// Summary of file: This component displays a movie card with poster and title, allowing users to select a movie for more details.
 
 export default function MovieCard({ movie, onSelect }) {
   return (

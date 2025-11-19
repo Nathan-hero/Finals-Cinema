@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 import { adminAPI } from "../../../utils/adminAPI";
 import AddMovieModal from "./AddMovieModal";
 import EditMovieModal from "./EditMovieModal";
-
 import RemoveMovieModal from "./RemoveMovieModal";
 import RemoveMovieStatus from "./RemoveMovieStatus";
+// Admin only access
+// Summary of file: Component for managing movies in admin dashboard (add, edit, remove, list)
 
 export default function ManageMovies() {
   const [showAddModal, setShowAddModal] = useState(false);

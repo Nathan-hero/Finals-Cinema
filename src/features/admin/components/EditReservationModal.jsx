@@ -1,4 +1,6 @@
 import React from "react";
+// Admin only access
+// Summary of file: Modal component for editing reservation details in admin dashboard
 
 export default function EditReservationModal({
   isOpen,

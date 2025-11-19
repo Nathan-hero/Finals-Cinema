@@ -2,6 +2,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { moviesAPI } from "../../../utils/api";
 import moviesData from "../../../shared/data/moviesData";
+// User access (Admin can see this section as well)
+// Summary of file: This component displays detailed information about a specific movie.
 
 export default function MovieDetails() {
   const { id } = useParams();
@@ -26,14 +28,14 @@ export default function MovieDetails() {
         setLoading(true);
         const backendMovie = await moviesAPI.getMovieById(id);
         
-        // Map backend fields to frontend format
+        // Map backend fields to frontend format || This might need changing
         const mappedMovie = {
           id: backendMovie._id,
           title: backendMovie.title,
           genre: Array.isArray(backendMovie.genre) ? backendMovie.genre.join(", ") : backendMovie.genre,
           runtime: backendMovie.duration,
           rating: backendMovie.movieRating,
-          price: 210, // Default price, you can add this to backend if needed
+          price: 210, // Default price
           featured: backendMovie.featured || false,
           schedule: ["2025-10-10T15:00", "2025-10-10T19:00", "2025-10-11T13:30"], // Default schedule
           about: backendMovie.description,

@@ -1,5 +1,8 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+// Admin only access
+// Summary of file: Navigation component for admin dashboard with active link highlighting
+
 
 export default function AdminNavigation() {
   const location = useLocation();

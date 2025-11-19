@@ -1,5 +1,5 @@
 import axios from "axios";
-
+// Summary of file: This module provides functions to interact with the backend API for movies and bookings, including automatic token handling for authentication.
 // Use Vite's environment variable syntax
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
