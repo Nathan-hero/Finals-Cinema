@@ -159,6 +159,19 @@ export default function EditMovieModal({
     }
   };
 
+  const handleImageLinkChange = (type, url) => {
+    const trimmedUrl = url.trim();
+    const urlField = type === "banner" ? "bannerURL" : "posterURL";
+    const setPreview = type === "banner" ? setBannerPreview : setPosterPreview;
+
+    setFormData((prev) => ({
+      ...prev,
+      [urlField]: trimmedUrl,
+    }));
+
+    setPreview(trimmedUrl || null);
+  };
+
   const attemptUpdate = async () => {
     if (
       !formData.title ||
@@ -205,7 +218,7 @@ export default function EditMovieModal({
     setShowConfirmModal(true);
   };
 
-  const ImageUploadButton = ({ id, preview, type, uploading }) => (
+  const ImageUploadButton = ({ id, preview, type, uploading, imageUrl, onLinkChange }) => (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-300">
         {type} Image <span className="text-red-500">*</span>
@@ -255,6 +268,19 @@ export default function EditMovieModal({
           </>
         )}
       </button>
+
+      <div className="space-y-1">
+        <label className="text-xs text-gray-400">
+          Or paste an image link
+        </label>
+        <input
+          type="url"
+          placeholder={`https://example.com/${type.toLowerCase()}.jpg`}
+          value={imageUrl}
+          onChange={(e) => onLinkChange(e.target.value)}
+          className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition"
+        />
+      </div>
     </div>
   );
 
@@ -308,6 +334,8 @@ export default function EditMovieModal({
                 preview={bannerPreview}
                 type="Banner"
                 uploading={uploadingBanner}
+                imageUrl={formData.bannerURL}
+                onLinkChange={(value) => handleImageLinkChange("banner", value)}
               />
 
               <ImageUploadButton
@@ -315,6 +343,8 @@ export default function EditMovieModal({
                 preview={posterPreview}
                 type="Poster"
                 uploading={uploadingPoster}
+                imageUrl={formData.posterURL}
+                onLinkChange={(value) => handleImageLinkChange("poster", value)}
               />
             </div>
 

@@ -19,6 +19,11 @@ export default function useFeaturedMovies(moviesData) {
   // Smooth transition
   const transitionToMovie = (index) => {
     if (index === featuredIndex || isTransitioning) return;
+    if (index < 0) {
+      index = featuredMovies.length - 1;
+    } else if (index >= featuredMovies.length) {
+      index = 0;
+    }
     setIsTransitioning(true);
     setTimeout(() => {
       setFeaturedIndex(index);

@@ -26,7 +26,7 @@ export default function FeaturedMovieSection({
           backgroundPosition: "center right",
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent pointer-events-none" />
 
       {/* Arrows */}
       {featuredMovies.length > 1 && (
@@ -36,7 +36,7 @@ export default function FeaturedMovieSection({
               onNavigate((featuredIndex - 1 + featuredMovies.length) % featuredMovies.length)
             }
             disabled={isTransitioning}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-red-600 rounded-full w-12 h-12 flex items-center justify-center"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-red-600 rounded-full w-12 h-12 flex items-center justify-center z-20 pointer-events-auto shadow-lg shadow-black/40 transition"
           >
             ‹
           </button>
@@ -45,7 +45,7 @@ export default function FeaturedMovieSection({
               onNavigate((featuredIndex + 1) % featuredMovies.length)
             }
             disabled={isTransitioning}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-red-600 rounded-full w-12 h-12 flex items-center justify-center"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-red-600 rounded-full w-12 h-12 flex items-center justify-center z-20 pointer-events-auto shadow-lg shadow-black/40 transition"
           >
             ›
           </button>

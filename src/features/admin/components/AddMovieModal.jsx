@@ -186,6 +186,19 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     }
   };
 
+  const handleImageLinkChange = (type, url) => {
+    const trimmedUrl = url.trim();
+    const urlField = type === "banner" ? "bannerURL" : "posterURL";
+    const setPreview = type === "banner" ? setBannerPreview : setPosterPreview;
+
+    setFormData((prev) => ({
+      ...prev,
+      [urlField]: trimmedUrl,
+    }));
+
+    setPreview(trimmedUrl || null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -268,7 +281,7 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     onClose();
   };
 
-  const ImageUpload = ({ type, preview, uploading }) => (
+  const ImageUpload = ({ type, preview, uploading, imageUrl, onLinkChange }) => (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-300">
         {type.charAt(0).toUpperCase() + type.slice(1)} Image{" "}
@@ -320,6 +333,19 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
           )}
         </button>
       </div>
+
+      <div className="space-y-1">
+        <label className="text-xs text-gray-400">
+          Or paste an image link
+        </label>
+        <input
+          type="url"
+          placeholder={`https://example.com/${type}.jpg`}
+          value={imageUrl}
+          onChange={(e) => onLinkChange(e.target.value)}
+          className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition"
+        />
+      </div>
     </div>
   );
 
@@ -368,8 +394,20 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
 
           <div className="p-8 pt-4 space-y-6 max-h-[70vh] overflow-y-auto">
             <div className="grid md:grid-cols-2 gap-6">
-              <ImageUpload type="banner" preview={bannerPreview} uploading={uploadingBanner} />
-              <ImageUpload type="poster" preview={posterPreview} uploading={uploadingPoster} />
+              <ImageUpload
+                type="banner"
+                preview={bannerPreview}
+                uploading={uploadingBanner}
+                imageUrl={formData.bannerURL}
+                onLinkChange={(value) => handleImageLinkChange("banner", value)}
+              />
+              <ImageUpload
+                type="poster"
+                preview={posterPreview}
+                uploading={uploadingPoster}
+                imageUrl={formData.posterURL}
+                onLinkChange={(value) => handleImageLinkChange("poster", value)}
+              />
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
