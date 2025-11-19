@@ -28,7 +28,7 @@ export default function MovieDetails() {
         setLoading(true);
         const backendMovie = await moviesAPI.getMovieById(id);
 
-        // Map backend fields to frontend format || This might need changing
+        // Map backend fields to frontend format 
         const mappedMovie = {
           id: backendMovie._id,
           title: backendMovie.title,

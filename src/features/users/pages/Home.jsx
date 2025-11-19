@@ -18,7 +18,6 @@ export default function Home({ searchQuery, movies: propMovies, user, isAdminVie
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   useEffect(() => {
     function handleOpenMovie(event) {
-      if (isAdminView) return;
       const movie = event.detail;
       if (!movie) return;
       setSelectedMovie(movie);
@@ -28,7 +27,7 @@ export default function Home({ searchQuery, movies: propMovies, user, isAdminVie
 
     window.addEventListener("cinease:openMovie", handleOpenMovie);
     return () => window.removeEventListener("cinease:openMovie", handleOpenMovie);
-  }, [isAdminView]);
+  }, []);
   const [showSeatPicker, setShowSeatPicker] = useState(false);
   const [filter, setFilter] = useState("All");
   const [selectedGenre, setSelectedGenre] = useState("All");

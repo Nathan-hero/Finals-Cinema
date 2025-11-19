@@ -73,7 +73,7 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
       onSearch("");
     }
 
-    const navigateTo = user && user.role === "admin" ? "/" : "/";
+    const navigateTo = user && user.role === "admin" ? "/admin/movies" : "/";
     navigate(navigateTo);
 
     setTimeout(() => {
