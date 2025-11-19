@@ -595,6 +595,27 @@ export default function EditMovieModal({
                 </div>
               )}
             </div>
+              {/* Featured Toggle || whatever movie gets toggled will be displayed on the top(The big image that continously rotate under the search)*/}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
+                Featured Movie
+              </label>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={formData.featured}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      featured: e.target.checked,
+                    }))
+                  }
+                  className="w-5 h-5 accent-red-600 cursor-pointer"
+                />
+                <span className="text-gray-300">Mark this movie as featured</span>
+              </div>
+            </div>
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-300">
