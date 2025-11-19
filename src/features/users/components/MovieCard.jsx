@@ -5,7 +5,7 @@ import React from "react";
 export default function MovieCard({ movie, onSelect }) {
   return (
     <div
-      onClick={() => onSelect(movie)}
+      onClick={() => onSelect?.(movie)}
       className="bg-white rounded-xl shadow hover:shadow-lg cursor-pointer overflow-hidden transition"
     >
       <img

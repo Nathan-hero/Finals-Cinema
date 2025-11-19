@@ -66,16 +66,23 @@ export default function Navbar({ user, onLogout, onSearch, moviesData }) {
 
   // Handle suggestion click
   function handleSuggestionClick(movie) {
-    setQuery(movie.title);
-    if (onSearch) onSearch(movie.title);
+    setQuery("");
     setShowSuggestions(false);
 
-    // Navigate to appropriate movies page based on user role
-    if (user && user.role === "admin") {
-      navigate("/admin/movies");
-    } else {
-      navigate("/");
+    if (onSearch) {
+      onSearch("");
     }
+
+    const navigateTo = user && user.role === "admin" ? "/" : "/";
+    navigate(navigateTo);
+
+    setTimeout(() => {
+      window.dispatchEvent(
+        new CustomEvent("cinease:openMovie", {
+          detail: movie,
+        })
+      );
+    }, 0);
   }
 
   // Handle keyboard navigation

@@ -16,6 +16,19 @@ import { adminAPI } from "../../../utils/adminAPI";
 export default function Home({ searchQuery, movies: propMovies, user, isAdminView }) {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
+  useEffect(() => {
+    function handleOpenMovie(event) {
+      if (isAdminView) return;
+      const movie = event.detail;
+      if (!movie) return;
+      setSelectedMovie(movie);
+      setSelectedSchedule(null);
+      setShowSeatPicker(false);
+    }
+
+    window.addEventListener("cinease:openMovie", handleOpenMovie);
+    return () => window.removeEventListener("cinease:openMovie", handleOpenMovie);
+  }, [isAdminView]);
   const [showSeatPicker, setShowSeatPicker] = useState(false);
   const [filter, setFilter] = useState("All");
   const [selectedGenre, setSelectedGenre] = useState("All");
@@ -147,7 +160,10 @@ export default function Home({ searchQuery, movies: propMovies, user, isAdminVie
         <GenreMovieList
           genres={genres}
           moviesData={movies}
-          onSelect={setSelectedMovie}
+          onSelect={(movie) => {
+            setSelectedMovie(movie);
+            setShowSeatPicker(false);
+          }}
           filter={filter}
           selectedGenre={selectedGenre}
           searchQuery={searchQuery}
