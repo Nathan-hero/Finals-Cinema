@@ -126,7 +126,7 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
 
       const result = await bookingAPI.createBooking(bookingData);
       
-      // ✅ Show success modal with booking details
+      // Show success modal with booking details
       setBookingDetails({
         ...bookingData,
         showtimeDisplay: scheduleDisplay,
@@ -158,7 +158,7 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
     onClose();
   }
 
-  // ✅ SUCCESS MODAL - COMPACT VERSION
+  // Success Modal
   if (showSuccessModal && bookingDetails) {
     return (
       <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 backdrop-blur-sm p-4">
@@ -236,7 +236,7 @@ export default function SeatPicker({ show, onClose, movie, selectedSchedule, onC
     );
   }
 
-  // SEAT PICKER MODAL
+  // Seat picker modal
   return (
     <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 backdrop-blur-sm p-4">
       <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white rounded-2xl shadow-2xl w-full max-w-5xl border border-gray-700/50 overflow-hidden max-h-[95vh] flex flex-col">

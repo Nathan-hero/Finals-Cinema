@@ -149,7 +149,7 @@ export default function AuthForm({ onAuthSuccess, onLogout, showLogoutConfirm, s
     }
   };
 
-  // ✅ Clear errors when switching tabs
+  // Clear errors when switching tabs
   const switchTab = (loginMode) => {
     setIsLogin(loginMode);
     setErr("");

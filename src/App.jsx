@@ -26,7 +26,7 @@ export default function App() {
       const parsedUser = JSON.parse(savedUser);
       setUser(parsedUser);
       
-      // ✅ Redirect admin to /admin page on app load (only from root)
+      // Redirect admin to /admin page on app load (only from root)
       if (parsedUser.role === "admin" && window.location.pathname === "/") {
         navigate("/admin");
       }
@@ -106,7 +106,6 @@ export default function App() {
     setSearchQuery(query);
   }
 
-  // ✅ Handle successful authentication with role-based redirect
   function handleAuthSuccess(authenticatedUser) {
     setUser(authenticatedUser);
     

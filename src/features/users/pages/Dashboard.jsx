@@ -114,7 +114,7 @@ export default function Dashboard() {
     });
   }
 
-  // ✅ Helper function to safely display seats
+  // Helper function to safely display seats
   function displaySeats(seats) {
     if (!seats) return "No seats";
     
