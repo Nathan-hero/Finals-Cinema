@@ -25,7 +25,7 @@ export default function App() {
     if (token && savedUser) {
       const parsedUser = JSON.parse(savedUser);
       setUser(parsedUser);
-      
+
       // Redirect admin to /admin page on app load (only from root)
       if (parsedUser.role === "admin" && window.location.pathname === "/") {
         navigate("/admin");
@@ -45,7 +45,7 @@ export default function App() {
           genre: Array.isArray(movie.genre) ? movie.genre.join(", ") : movie.genre,
           runtime: movie.duration,
           rating: movie.movieRating,
-          price: 210,
+          price: movie.price ?? movie.ticketPrice ?? movie.moviePrice ?? 210,
           featured: movie.featured || false,
           schedules: movie.schedules || [],
           schedule: movie.schedule || [],
@@ -108,7 +108,7 @@ export default function App() {
 
   function handleAuthSuccess(authenticatedUser) {
     setUser(authenticatedUser);
-    
+
     // Redirect based on user role
     if (authenticatedUser.role === "admin") {
       navigate("/admin");
@@ -155,8 +155,8 @@ export default function App() {
       <main className="flex-1">
         <Routes>
           {/* Root route - Login or User Home */}
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={
               user ? (
                 user.role === "admin" ? (
@@ -167,37 +167,37 @@ export default function App() {
               ) : (
                 <AuthForm onAuthSuccess={handleAuthSuccess} />
               )
-            } 
+            }
           />
 
           {/* User Routes */}
-          <Route 
-            path="/dashboard" 
-            element={<Dashboard />} 
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
           />
-          <Route 
-            path="/movie/:id" 
-            element={<MovieDetails />} 
+          <Route
+            path="/movie/:id"
+            element={<MovieDetails />}
           />
 
           {/* Admin Routes */}
-          <Route 
-            path="/admin" 
-            element={<AdminDashboard />} 
+          <Route
+            path="/admin"
+            element={<AdminDashboard />}
           />
-          <Route 
-            path="/admin/movies" 
-            element={<Home searchQuery={searchQuery} movies={movies} isAdminView={true} user={user} />} 
+          <Route
+            path="/admin/movies"
+            element={<Home searchQuery={searchQuery} movies={movies} isAdminView={true} user={user} />}
           />
-          <Route 
-            path="/admin/movie/:id" 
-            element={<MovieDetails isAdminView={true} />} 
+          <Route
+            path="/admin/movie/:id"
+            element={<MovieDetails isAdminView={true} />}
           />
 
           {/* Auth Route */}
-          <Route 
-            path="/auth" 
-            element={<AuthForm onAuthSuccess={handleAuthSuccess} />} 
+          <Route
+            path="/auth"
+            element={<AuthForm onAuthSuccess={handleAuthSuccess} />}
           />
         </Routes>
       </main>

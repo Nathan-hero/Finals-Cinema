@@ -114,9 +114,9 @@ export default function EditMovieModal({
         price: movieData.price || "",
         schedules: Array.isArray(movieData.schedules)
           ? movieData.schedules.map((s) => ({
-              ...s,
-              date: Array.isArray(s.date) ? s.date : [s.date],
-            }))
+            ...s,
+            date: Array.isArray(s.date) ? s.date : [s.date],
+          }))
           : [],
       });
 
@@ -190,6 +190,8 @@ export default function EditMovieModal({
 
     const movieDataToUpdate = {
       ...formData,
+      price: Number(formData.price),
+      duration: Number(formData.duration),
       genre: formData.genre.length > 0 ? formData.genre : ["General"],
       starring:
         formData.starring.length > 0 ? formData.starring : ["Unknown"],
@@ -465,8 +467,8 @@ export default function EditMovieModal({
                       field === "genre"
                         ? "Action, Drama"
                         : field === "starring"
-                        ? "Actor 1, Actor 2"
-                        : "Director 1, Director 2"
+                          ? "Actor 1, Actor 2"
+                          : "Director 1, Director 2"
                     }
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -591,12 +593,12 @@ export default function EditMovieModal({
 
                     const formatted = dateStr
                       ? new Date(dateStr).toLocaleString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                        })
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
                       : "";
 
                     return (
@@ -640,7 +642,7 @@ export default function EditMovieModal({
                 </div>
               )}
             </div>
-              {/* Featured Toggle || whatever movie gets toggled will be displayed on the top(The big image that continously rotate under the search)*/}
+            {/* Featured Toggle || whatever movie gets toggled will be displayed on the top(The big image that continously rotate under the search)*/}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-300">
                 Featured Movie

@@ -232,7 +232,8 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
       !formData.movieRating ||
       !formData.duration ||
       !formData.posterURL ||
-      !formData.bannerURL
+      !formData.bannerURL ||
+      !formData.price
     ) {
       showNotification("Please fill in all basic required fields and upload images", "error");
       return;
@@ -246,6 +247,8 @@ export default function AddMovieModal({ isOpen, onClose, onMovieAdded }) {
     // Prepare data for submission
     const movieData = {
       ...formData,
+      price: Number(formData.price),
+      duration: Number(formData.duration),
       genre: formData.genre.length > 0 ? formData.genre : ["General"],
       starring: formData.starring.length > 0 ? formData.starring : ["Unknown"],
       creators: formData.creators.length > 0 ? formData.creators : ["Unknown"],

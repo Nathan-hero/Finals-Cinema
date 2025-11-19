@@ -27,7 +27,7 @@ export default function MovieDetails() {
       try {
         setLoading(true);
         const backendMovie = await moviesAPI.getMovieById(id);
-        
+
         // Map backend fields to frontend format || This might need changing
         const mappedMovie = {
           id: backendMovie._id,
@@ -35,14 +35,18 @@ export default function MovieDetails() {
           genre: Array.isArray(backendMovie.genre) ? backendMovie.genre.join(", ") : backendMovie.genre,
           runtime: backendMovie.duration,
           rating: backendMovie.movieRating,
-          price: movie.price ?? movie.ticketPrice ?? movie.moviePrice ?? 210, // 3
+          price:
+            backendMovie.price ??
+            backendMovie.ticketPrice ??
+            backendMovie.moviePrice ??
+            210,
           featured: backendMovie.featured || false,
           schedule: ["2025-10-10T15:00", "2025-10-10T19:00", "2025-10-11T13:30"], // Default schedule
           about: backendMovie.description,
           poster: backendMovie.posterURL,
           banner: backendMovie.bannerURL,
         };
-        
+
         setMovie(mappedMovie);
         setError(null);
       } catch (err) {
@@ -91,7 +95,7 @@ export default function MovieDetails() {
       <section
         className="relative h-[100vh] flex items-end justify-start p-10"
         style={{
-          
+
         }}
       >
       </section>
